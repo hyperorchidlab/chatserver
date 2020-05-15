@@ -1,12 +1,12 @@
 package db
 
 import (
-	"github.com/kprc/nbsnetwork/db"
-	"sync"
-	"github.com/kprc/chatserver/config"
-	"errors"
-	"github.com/kprc/nbsnetwork/tools"
 	"encoding/json"
+	"errors"
+	"github.com/kprc/chatserver/config"
+	"github.com/kprc/nbsnetwork/db"
+	"github.com/kprc/nbsnetwork/tools"
+	"sync"
 )
 
 type ChatGroupsDB struct {
@@ -15,34 +15,33 @@ type ChatGroupsDB struct {
 	cursor *db.DBCusor
 }
 
-
 var (
-	cgStore *ChatGroupsDB
+	cgStore     *ChatGroupsDB
 	cgStoreLock sync.Mutex
 )
 
 type Group struct {
-	Alias string		`json:"as"`
-	GrpId string		`json:"-"`
-	RefCnt int			`json:"rcnt"`
-	Owner string		`json:"owner"`
-	CreateTime int64		`json:"ct"`
-	UpdateTime int64	`json:"ut"`
+	Alias      string `json:"as"`
+	GrpId      string `json:"-"`
+	RefCnt     int    `json:"rcnt"`
+	Owner      string `json:"owner"`
+	CreateTime int64  `json:"ct"`
+	UpdateTime int64  `json:"ut"`
 }
 
-func newChatGroupDb() *ChatGroupsDB  {
-	cfg:=config.GetCSC()
-	db:=db.NewFileDb(cfg.GetGroupsDbPath()).Load()
+func newChatGroupDb() *ChatGroupsDB {
+	cfg := config.GetCSC()
+	db := db.NewFileDb(cfg.GetGroupsDbPath()).Load()
 
-	return &ChatGroupsDB{NbsDbInter:db}
+	return &ChatGroupsDB{NbsDbInter: db}
 }
 
-func GetChatGroupsDB() *ChatGroupsDB  {
-	if cgStore == nil{
+func GetChatGroupsDB() *ChatGroupsDB {
+	if cgStore == nil {
 		cgStoreLock.Lock()
 		defer cgStoreLock.Unlock()
 
-		if cgStore == nil{
+		if cgStore == nil {
 			cgStore = newChatGroupDb()
 		}
 
@@ -50,78 +49,76 @@ func GetChatGroupsDB() *ChatGroupsDB  {
 	return cgStore
 }
 
-func (cg *ChatGroupsDB)Insert(grpID string, alias, owner string) error {
+func (cg *ChatGroupsDB) Insert(grpID string, alias, owner string) error {
 	cg.dbLock.Lock()
 	defer cg.dbLock.Unlock()
 
-	if _,err:=cg.NbsDbInter.Find(grpID);err==nil{
+	if _, err := cg.NbsDbInter.Find(grpID); err == nil {
 		return errors.New("group id is in db")
 	}
-	now:=tools.GetNowMsTime()
-	g:=&Group{}
+	now := tools.GetNowMsTime()
+	g := &Group{}
 	g.Alias = alias
 	g.CreateTime = now
 	g.UpdateTime = now
 	g.Owner = owner
 	g.RefCnt = 0
 
-	if v,err:=json.Marshal(*g);err!=nil{
+	if v, err := json.Marshal(*g); err != nil {
 		return err
-	}else{
-		return cg.NbsDbInter.Insert(grpID,string(v))
+	} else {
+		return cg.NbsDbInter.Insert(grpID, string(v))
 	}
 
 }
 
-func (cg *ChatGroupsDB)UpdateAlias(grpId string,alias string) error  {
+func (cg *ChatGroupsDB) UpdateAlias(grpId string, alias string) error {
 	cg.dbLock.Lock()
 	defer cg.dbLock.Unlock()
 
-	if vs,err:=cg.NbsDbInter.Find(grpId);err!=nil{
+	if vs, err := cg.NbsDbInter.Find(grpId); err != nil {
 		return err
-	}else{
-		g:=&Group{}
-		err = json.Unmarshal([]byte(vs),g)
-		if err!=nil{
+	} else {
+		g := &Group{}
+		err = json.Unmarshal([]byte(vs), g)
+		if err != nil {
 			return err
-		}else{
+		} else {
 			g.GrpId = grpId
 		}
 
-		now :=tools.GetNowMsTime()
+		now := tools.GetNowMsTime()
 		g.Alias = alias
 
 		g.UpdateTime = now
 
-		if v,err := json.Marshal(*g);err!=nil{
+		if v, err := json.Marshal(*g); err != nil {
 			return err
-		}else{
-			cg.NbsDbInter.Update(grpId,string(v))
+		} else {
+			cg.NbsDbInter.Update(grpId, string(v))
 		}
 	}
 
 	return nil
 }
 
-
-func (cg *ChatGroupsDB)IncRefer(grpId string) error  {
+func (cg *ChatGroupsDB) IncRefer(grpId string) error {
 	cg.dbLock.Lock()
 	defer cg.dbLock.Unlock()
-	if vs,err:=cg.NbsDbInter.Find(grpId);err!=nil{
+	if vs, err := cg.NbsDbInter.Find(grpId); err != nil {
 		return err
-	}else{
-		g:=&Group{}
-		err = json.Unmarshal([]byte(vs),g)
-		if err!=nil{
+	} else {
+		g := &Group{}
+		err = json.Unmarshal([]byte(vs), g)
+		if err != nil {
 			return err
 		}
-		g.RefCnt ++
+		g.RefCnt++
 
-
-		if v,err := json.Marshal(*g);err!=nil{
+		if v, err := json.Marshal(*g); err != nil {
 			return err
-		}else{
-			cg.NbsDbInter.Update(grpId,string(v))
+		} else {
+			cg.NbsDbInter.Update(grpId, string(v))
 		}
 	}
 
@@ -129,28 +126,26 @@ func (cg *ChatGroupsDB)IncRefer(grpId string) error  {
 
 }
 
-
-func (cg *ChatGroupsDB)DecRefer(grpId string) error  {
+func (cg *ChatGroupsDB) DecRefer(grpId string) error {
 	cg.dbLock.Lock()
 	defer cg.dbLock.Unlock()
-	if vs,err:=cg.NbsDbInter.Find(grpId);err!=nil{
+	if vs, err := cg.NbsDbInter.Find(grpId); err != nil {
 		return err
-	}else{
-		g:=&Group{}
-		err = json.Unmarshal([]byte(vs),g)
-		if err!=nil{
+	} else {
+		g := &Group{}
+		err = json.Unmarshal([]byte(vs), g)
+		if err != nil {
 			return err
 		}
-		g.RefCnt --
+		g.RefCnt--
 
-
-		if g.RefCnt <=0{
+		if g.RefCnt <= 0 {
 			cg.NbsDbInter.Delete(grpId)
-		}else{
-			if v,err := json.Marshal(*g);err!=nil{
+		} else {
+			if v, err := json.Marshal(*g); err != nil {
 				return err
-			}else{
-				cg.NbsDbInter.Update(grpId,string(v))
+			} else {
+				cg.NbsDbInter.Update(grpId, string(v))
 			}
 		}
 	}
@@ -159,30 +154,27 @@ func (cg *ChatGroupsDB)DecRefer(grpId string) error  {
 
 }
 
-
-func (cg *ChatGroupsDB)Find(grpId string) (*Group,error)  {
+func (cg *ChatGroupsDB) Find(grpId string) (*Group, error) {
 	cg.dbLock.Unlock()
 	defer cg.dbLock.Unlock()
 
-	if vs,err:=cg.NbsDbInter.Find(grpId);err!=nil{
-		return nil,err
-	}else{
-		f:=&Group{}
-		err = json.Unmarshal([]byte(vs),f)
-		if err!=nil{
-			return nil,err
-		}else{
+	if vs, err := cg.NbsDbInter.Find(grpId); err != nil {
+		return nil, err
+	} else {
+		f := &Group{}
+		err = json.Unmarshal([]byte(vs), f)
+		if err != nil {
+			return nil, err
+		} else {
 			f.GrpId = grpId
 
-			return f,nil
+			return f, nil
 		}
 	}
 
 }
 
-
-
-func (s *ChatGroupsDB)Iterator()  {
+func (s *ChatGroupsDB) Iterator() {
 
 	s.dbLock.Lock()
 	defer s.dbLock.Unlock()
@@ -190,23 +182,22 @@ func (s *ChatGroupsDB)Iterator()  {
 	s.cursor = s.NbsDbInter.DBIterator()
 }
 
-
-func (s *ChatGroupsDB)Next() (key string,meta *Group,r1 error)  {
-	if s.cursor == nil{
+func (s *ChatGroupsDB) Next() (key string, meta *Group, r1 error) {
+	if s.cursor == nil {
 		return
 	}
 	s.dbLock.Lock()
 	s.dbLock.Unlock()
-	k,v:=s.cursor.Next()
-	if k == ""{
+	k, v := s.cursor.Next()
+	if k == "" {
 		s.dbLock.Unlock()
-		return "",nil,nil
+		return "", nil, nil
 	}
 	s.dbLock.Unlock()
 	meta = &Group{}
 
-	if err := json.Unmarshal([]byte(v),meta);err!=nil{
-		return "",nil,err
+	if err := json.Unmarshal([]byte(v), meta); err != nil {
+		return "", nil, err
 	}
 	meta.GrpId = k
 
@@ -215,6 +206,3 @@ func (s *ChatGroupsDB)Next() (key string,meta *Group,r1 error)  {
 	return
 
 }
-
-
-

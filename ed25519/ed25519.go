@@ -1,64 +1,63 @@
 package ed25519
 
 import (
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/tools"
-	"log"
-	"encoding/json"
-	"github.com/btcsuite/btcutil/base58"
-	"github.com/BASChain/go-account"
-	"crypto/ed25519"
-	"crypto/rand"
 	"crypto/aes"
 	"crypto/cipher"
-	"io"
-	"fmt"
-	"golang.org/x/crypto/curve25519"
+	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/sha512"
+	"encoding/json"
+	"fmt"
+	"github.com/BASChain/go-account"
 	"github.com/BASChain/go-account/edwards25519"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/chatserver/config"
+	"github.com/kprc/nbsnetwork/tools"
+	"golang.org/x/crypto/curve25519"
+	"io"
+	"log"
 )
 
 type KeyJson struct {
-	PubKey string `json:"pub_key"`
+	PubKey    string `json:"pub_key"`
 	CipherKey string `json:"cipher_key"`
 }
 
-
 func KeyIsGenerated() bool {
-	cfg:=config.GetCSC()
-	if cfg == nil{
+	cfg := config.GetCSC()
+	if cfg == nil {
 		log.Fatal("Can't Get Config file")
 		return false
 	}
 
-	if tools.FileExists(cfg.GetKeyPath()){
+	if tools.FileExists(cfg.GetKeyPath()) {
 		return true
 	}
 
 	return false
 }
 
-func LoadKey(password string)  {
-	cfg:=config.GetCSC()
+func LoadKey(password string) {
+	cfg := config.GetCSC()
 
-	data,err:=tools.OpenAndReadAll(cfg.GetKeyPath())
-	if err!=nil{
+	data, err := tools.OpenAndReadAll(cfg.GetKeyPath())
+	if err != nil {
 		log.Fatal("Load From key file error")
 		return
 	}
 
 	kj := &KeyJson{}
 
-	err = json.Unmarshal(data,kj)
-	if err!=nil{
+	err = json.Unmarshal(data, kj)
+	if err != nil {
 		log.Fatal("Load From json error")
 		return
 	}
 
 	pk := base58.Decode(kj.PubKey)
 	var priv ed25519.PrivateKey
-	priv,err=account.DecryptSubPriKey(ed25519.PublicKey(pk),kj.CipherKey,password)
-	if err!=nil{
+	priv, err = account.DecryptSubPriKey(ed25519.PublicKey(pk), kj.CipherKey, password)
+	if err != nil {
 		log.Fatal("Decrypt PrivKey failed")
 		return
 	}
@@ -70,56 +69,54 @@ func LoadKey(password string)  {
 
 }
 
-
-func GenEd25519KeyAndSave(password string) error{
+func GenEd25519KeyAndSave(password string) error {
 
 	var (
 		priv ed25519.PrivateKey
-		pub ed25519.PublicKey
-		err error
+		pub  ed25519.PublicKey
+		err  error
 	)
-	cnt:=0
+	cnt := 0
 	for {
-		cnt ++
-		pub,priv,err = ed25519.GenerateKey(rand.Reader)
-		if err!=nil{
-			if cnt > 10{
+		cnt++
+		pub, priv, err = ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			if cnt > 10 {
 				return err
 			}
 			continue
-		}else{
+		} else {
 			break
 		}
 	}
 
 	var cipherTxt string
-	cipherTxt,err = account.EncryptSubPriKey(priv,pub,password)
-	if err!=nil{
+	cipherTxt, err = account.EncryptSubPriKey(priv, pub, password)
+	if err != nil {
 		return err
 	}
 
-	kj:=&KeyJson{PubKey:base58.Encode(pub[:]),CipherKey:cipherTxt}
+	kj := &KeyJson{PubKey: base58.Encode(pub[:]), CipherKey: cipherTxt}
 
-	cfg:=config.GetCSC()
+	cfg := config.GetCSC()
 
 	var data []byte
-	data,err = json.Marshal(*kj)
-	err = tools.Save2File(data,cfg.GetKeyPath())
-	if err!=nil{
+	data, err = json.Marshal(*kj)
+	err = tools.Save2File(data, cfg.GetKeyPath())
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func Sign(priv ed25519.PrivateKey,message []byte) []byte  {
-	return ed25519.Sign(priv,message)
+func Sign(priv ed25519.PrivateKey, message []byte) []byte {
+	return ed25519.Sign(priv, message)
 }
 
-func Verify(pub ed25519.PublicKey,message,sig []byte) bool {
-	return ed25519.Verify(pub,message,sig)
+func Verify(pub ed25519.PublicKey, message, sig []byte) bool {
+	return ed25519.Verify(pub, message, sig)
 }
-
 
 func EncryptWithIV(key, iv, plainTxt []byte) ([]byte, error) {
 
@@ -160,20 +157,20 @@ func Encrypt(key []byte, plainTxt []byte) ([]byte, error) {
 
 func Decrypt(key []byte, cipherTxt []byte) ([]byte, error) {
 
-	_,plainTxt,err:=DecryptAndIV(key,cipherTxt)
+	_, plainTxt, err := DecryptAndIV(key, cipherTxt)
 
-	return plainTxt,err
+	return plainTxt, err
 
 }
 
 func DecryptAndIV(key []byte, cipherTxt []byte) (iv, plainTxt []byte, err error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
 
 	if len(cipherTxt) < aes.BlockSize {
-		return nil,nil, fmt.Errorf("cipher text too short")
+		return nil, nil, fmt.Errorf("cipher text too short")
 	}
 
 	iv = cipherTxt[:aes.BlockSize]
@@ -182,17 +179,16 @@ func DecryptAndIV(key []byte, cipherTxt []byte) (iv, plainTxt []byte, err error)
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(cipherTxt, cipherTxt)
 
-	return iv,cipherTxt, nil
+	return iv, cipherTxt, nil
 }
 
-func DeriveKey(seed []byte) (pub ed25519.PublicKey,priv ed25519.PrivateKey)  {
+func DeriveKey(seed []byte) (pub ed25519.PublicKey, priv ed25519.PrivateKey) {
 	privateKey := ed25519.NewKeyFromSeed(seed)
 	publicKey := make([]byte, ed25519.PublicKeySize)
 	copy(publicKey, privateKey[32:])
 
-	return publicKey,privateKey
+	return publicKey, privateKey
 }
-
 
 var KP = struct {
 	S int
@@ -210,7 +206,6 @@ var KP = struct {
 var (
 	EConvertCurvePubKey = fmt.Errorf("convert ed25519 public key to curve25519 public key failed")
 )
-
 
 func GenerateAesKey(peerPub []byte, key ed25519.PrivateKey) ([]byte, error) {
 	var priKey [32]byte
@@ -267,7 +262,3 @@ func PublicKeyToCurve25519(curve25519Public *[32]byte, publicKey *[32]byte) bool
 	edwards25519.FeToBytes(curve25519Public, &x)
 	return true
 }
-
-
-
-
