@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"sync"
+	"crypto/ed25519"
 )
 
 const (
@@ -19,7 +20,16 @@ type ChatServerConfig struct {
 
 	CmdListenPort string          `json:"cmdlistenport"`
 
-	//RemoteServer  string          `json:"remoteserver"`
+	DBPath string					`json:"dbpath"`
+	UsersDBFile string				`json:"usersdbfile"`
+	FriendsDBFile string			`json:"friendsdbfile"`
+	GroupsDBFile string				`json:"groupsdbfile"`
+	
+	ChatListenPort int			`json:"chatport"`
+	KeyFile string 				`json:"keyfile"`
+
+	PrivKey ed25519.PrivateKey   `json:"-"`
+	PubKey  ed25519.PublicKey	`json:"-"`
 }
 
 var (
@@ -30,6 +40,12 @@ var (
 func (bc *ChatServerConfig) InitCfg() *ChatServerConfig {
 	bc.MgtHttpPort = 50818
 	bc.CmdListenPort = "127.0.0.1:59527"
+	bc.DBPath = "/db"
+	bc.UsersDBFile = "users.db"
+	bc.FriendsDBFile = "friends.db"
+	bc.GroupsDBFile = "groups.db"
+	bc.ChatListenPort = 39527
+	bc.KeyFile = "chat_server.key"
 
 	return bc
 }
@@ -156,6 +172,35 @@ func (bc *ChatServerConfig) Save() {
 	}
 
 }
+
+func (bc *ChatServerConfig)getDbPath() string  {
+	dbpath:= path.Join(GetCSCHomeDir(),bc.DBPath)
+
+	if tools.FileExists(dbpath){
+		return dbpath
+	}else{
+		os.MkdirAll(dbpath,0755)
+	}
+
+	return dbpath
+}
+
+func (bc *ChatServerConfig)GetUsersDbPath() string  {
+	return path.Join(bc.getDbPath(),bc.UsersDBFile)
+}
+
+func (bc *ChatServerConfig)GetFriendsDbPath() string  {
+	return path.Join(bc.getDbPath(),bc.FriendsDBFile)
+}
+
+func (bc *ChatServerConfig)GetGroupsDbPath() string  {
+	return path.Join(bc.getDbPath(),bc.GroupsDBFile)
+}
+
+func (bc *ChatServerConfig)GetKeyPath() string  {
+	return path.Join(GetCSCHomeDir(),bc.KeyFile)
+}
+
 
 func IsInitialized() bool {
 	if tools.FileExists(GetCSCFGFile()) {

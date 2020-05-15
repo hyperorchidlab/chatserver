@@ -1,6 +1,7 @@
 syntax = "proto3";
 
-package cmdpb;
+//package cmdpb;
+option go_package = ".;cmdpb";
 
 import "default.proto";
 
