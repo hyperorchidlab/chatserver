@@ -24,8 +24,10 @@ type ChatServerConfig struct {
 	UsersDBFile string				`json:"usersdbfile"`
 	FriendsDBFile string			`json:"friendsdbfile"`
 	GroupsDBFile string				`json:"groupsdbfile"`
+	GrpMemberDBFile string          `json:"grpmemberdbfile"`
 	
 	ChatListenPort int			`json:"chatport"`
+	//ChatMgmtPort   int			`json:"chatmgmtport"`
 	KeyFile string 				`json:"keyfile"`
 
 	PrivKey ed25519.PrivateKey   `json:"-"`
@@ -44,6 +46,8 @@ func (bc *ChatServerConfig) InitCfg() *ChatServerConfig {
 	bc.UsersDBFile = "users.db"
 	bc.FriendsDBFile = "friends.db"
 	bc.GroupsDBFile = "groups.db"
+	bc.GrpMemberDBFile = "grpm.db"
+	//bc.ChatMgmtPort = 39527
 	bc.ChatListenPort = 39527
 	bc.KeyFile = "chat_server.key"
 
@@ -199,6 +203,10 @@ func (bc *ChatServerConfig)GetGroupsDbPath() string  {
 
 func (bc *ChatServerConfig)GetKeyPath() string  {
 	return path.Join(GetCSCHomeDir(),bc.KeyFile)
+}
+
+func (bc *ChatServerConfig)GetGrpMbrsDbPath() string  {
+	return path.Join(bc.getDbPath(),bc.GrpMemberDBFile)
 }
 
 

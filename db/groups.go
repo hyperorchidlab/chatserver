@@ -141,6 +141,7 @@ func (cg *ChatGroupsDB) DecRefer(grpId string) error {
 
 		if g.RefCnt <= 0 {
 			cg.NbsDbInter.Delete(grpId)
+			return nil
 		} else {
 			if v, err := json.Marshal(*g); err != nil {
 				return err

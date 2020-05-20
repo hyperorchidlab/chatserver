@@ -13,8 +13,7 @@ import (
 var webserver *http.Server
 
 var(
-	register string = "reg"
-	online string = "online"
+	register string = "userreg"
 	addfriend string = "addfriend"
 	removefriend string = "removefriend"
 	addgroup string = "addgroup"
@@ -29,7 +28,7 @@ var(
 func StartWebDaemon() {
 	mux := http.NewServeMux()
 
-	mux.Handle("/ajax/chg", api.NewWhiteList())
+	mux.Handle("/ajax/userreg", &api.UserRegister{})
 
 	addr := ":" + strconv.Itoa(config.GetCSC().MgtHttpPort)
 

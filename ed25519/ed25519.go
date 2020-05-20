@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"github.com/BASChain/go-account"
 	"github.com/BASChain/go-account/edwards25519"
-	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/nbsnetwork/tools"
 	"golang.org/x/crypto/curve25519"
 	"io"
 	"log"
+	"github.com/kprc/chat-protocol/address"
 )
 
 type KeyJson struct {
@@ -54,9 +54,9 @@ func LoadKey(password string) {
 		return
 	}
 
-	pk := base58.Decode(kj.PubKey)
+	pk := address.ChatAddress(kj.PubKey).ToPubKey()
 	var priv ed25519.PrivateKey
-	priv, err = account.DecryptSubPriKey(ed25519.PublicKey(pk), kj.CipherKey, password)
+	priv, err = account.DecryptSubPriKey(pk, kj.CipherKey, password)
 	if err != nil {
 		log.Fatal("Decrypt PrivKey failed")
 		return
@@ -96,7 +96,7 @@ func GenEd25519KeyAndSave(password string) error {
 		return err
 	}
 
-	kj := &KeyJson{PubKey: base58.Encode(pub[:]), CipherKey: cipherTxt}
+	kj := &KeyJson{PubKey: address.ToAddress(pub[:]).String(), CipherKey: cipherTxt}
 
 	cfg := config.GetCSC()
 
