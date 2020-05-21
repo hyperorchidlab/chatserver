@@ -28,7 +28,7 @@ func AddFriend(uc *protocol.UserCommand) *protocol.UCReply {
 
 	fdb:=db.GetChatFriendsDB()
 
-	_,err = fdb.Find(uc.SP.SignText.CPubKey)
+	_,err = fdb.FindFriend(uc.SP.SignText.CPubKey,req.FD.PeerPubKey)
 	if err!=nil{
 		fdb.AgreeFriend(uc.SP.SignText.CPubKey,req.FD.PeerPubKey,true)
 		fdb.AgreeFriend(req.FD.PeerPubKey,uc.SP.SignText.CPubKey,false)

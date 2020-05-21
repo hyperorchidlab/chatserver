@@ -11,6 +11,7 @@ import (
 	"github.com/kprc/chatserver/db"
 	"github.com/kprc/chatserver/ed25519"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/nbsnetwork/tools"
 )
 
 type MessageDispatch struct {
@@ -54,11 +55,16 @@ func (uc *MessageDispatch)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 		reply = AddFriend(req)
 	case protocol.DelFriend:
 		reply = DelFriend(req)
+	case protocol.ChgGroup:
+		reply = ChangeGroup(req)
 	case protocol.AddGroup:
+		reply = AddGroup(req)
 	case protocol.DelGroup:
+		reply = DelGroup(req)
 	case protocol.JoinGroup:
+		reply = JoinGroup(req)
 	case protocol.QuitGroup:
-
+		reply = QuitGroup(req)
 	}
 
 	var bresp []byte
@@ -92,6 +98,10 @@ func ValidateSig(sp *protocol.SignPack) bool {
 	}
 
 	if u.Alias != sp.SignText.AliasName || u.ExpireTinme != sp.SignText.ExpireTime{
+		return false
+	}
+
+	if u.ExpireTinme < tools.GetNowMsTime(){
 		return false
 	}
 

@@ -249,6 +249,28 @@ func (cf *ChatFriendsDb)FindFriend(ownerPk string, friend string) (*Friend,error
 	return nil,errors.New("Not Found")
 }
 
+func (cf *ChatFriendsDb)FindGroup(ownerPk string,grpId string) (string,error)  {
+	cf.dbLock.Lock()
+	defer cf.dbLock.Unlock()
+
+	if vs, err := cf.NbsDbInter.Find(ownerPk); err != nil {
+		return "", err
+	} else {
+		cfs := &ChatFriends{}
+		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
+			return "", err
+		}
+		//cfs.Owner = ownerPk
+		for i:=0;i<len(cfs.Groups);i++{
+			if cfs.Groups[i] == grpId{
+				return cfs.Groups[i],err
+			}
+		}
+	}
+
+	return "",errors.New("Not Found")
+}
+
 
 func (s *ChatFriendsDb) Save() {
 

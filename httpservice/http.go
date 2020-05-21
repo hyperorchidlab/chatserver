@@ -12,23 +12,12 @@ import (
 
 var webserver *http.Server
 
-var(
-	register string = "userreg"
-	addfriend string = "addfriend"
-	removefriend string = "removefriend"
-	addgroup string = "addgroup"
-	removegroup string = "removegroup"
-	joingroup string = "joingroup"
-	quitgroup string = "quitgroup"
-
-	groupmsg string = "groupmsg"
-	p2pmsg string = "p2pmsg"
-)
 
 func StartWebDaemon() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/ajax/userreg", &api.UserRegister{})
+	mux.Handle("/ajax/cmd",&api.MessageDispatch{})
 
 	addr := ":" + strconv.Itoa(config.GetCSC().MgtHttpPort)
 
