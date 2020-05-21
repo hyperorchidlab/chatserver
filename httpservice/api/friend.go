@@ -2,12 +2,13 @@ package api
 
 import (
 	"github.com/kprc/chat-protocol/protocol"
-	"github.com/kprc/chatserver/ed25519"
+
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chatserver/config"
 	"encoding/json"
 	"github.com/kprc/chatserver/db"
+	"github.com/kprc/chatserver/chatcrypt"
 )
 
 func AddFriend(uc *protocol.UserCommand) *protocol.UCReply {
@@ -75,13 +76,13 @@ func DecryptFriendDesc(uc *protocol.UserCommand) (fr *protocol.FriendReq,err err
 	var (
 		key,plainbytes []byte
 	)
-	key,err = ed25519.GenerateAesKey(address.ChatAddress(uc.SP.SignText.CPubKey).ToPubKey(),cfg.PrivKey)
+	key,err = chatcrypt.GenerateAesKey(address.ChatAddress(uc.SP.SignText.CPubKey).ToPubKey(),cfg.PrivKey)
 	if err!=nil{
 		return nil,err
 	}
 
 
-	plainbytes,err = ed25519.Decrypt(key,cryptbytes)
+	plainbytes,err = chatcrypt.Decrypt(key,cryptbytes)
 	if err!=nil{
 		return nil,err
 	}

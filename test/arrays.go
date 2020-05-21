@@ -20,7 +20,7 @@ func main()  {
 	}
 
 
-	r := ed25519.InsertionSortDArray(arr)
+	r := chatcrypt.InsertionSortDArray(arr)
 
 	for i:=0;i<len(r);i++{
 		fmt.Println(string(r[i]))

@@ -7,11 +7,11 @@ import (
 	"encoding/json"
 
 	"github.com/kprc/chatserver/db"
-	"github.com/kprc/chatserver/ed25519"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chat-protocol/address"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/chatserver/chatcrypt"
 )
 
 type UserRegister struct {
@@ -89,7 +89,7 @@ func (ur *UserRegister) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			signtxt,_:=json.Marshal(resp.SP.SignText)
 
-			resp.SP.Sign = base58.Encode(ed25519.Sign(config.GetCSC().PrivKey,signtxt))
+			resp.SP.Sign = base58.Encode(chatcrypt.Sign(config.GetCSC().PrivKey,signtxt))
 
 		}
 

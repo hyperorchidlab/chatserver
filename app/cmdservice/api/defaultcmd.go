@@ -11,6 +11,8 @@ import (
 
 	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/kprc/chatserver/app/cmdpb"
+	"github.com/kprc/chat-protocol/address"
+	"github.com/kprc/chatserver/httpservice"
 )
 
 type CmdDefaultServer struct {
@@ -25,6 +27,14 @@ func (cds *CmdDefaultServer) DefaultCmdDo(ctx context.Context,
 
 	if request.Reqid == cmdcommon.CMD_CONFIG_SHOW {
 		return cds.configShow()
+	}
+
+	if request.Reqid == cmdcommon.CMD_PK_SHOW {
+		return cds.accountShow()
+	}
+
+	if request.Reqid == cmdcommon.CMD_RUN {
+		return cds.serverRun()
 	}
 
 	resp := &cmdpb.DefaultResp{}
@@ -61,4 +71,27 @@ func (cds *CmdDefaultServer) configShow() (*cmdpb.DefaultResp, error) {
 	}
 
 	return encapResp(string(bapc)), nil
+}
+
+
+func (cds *CmdDefaultServer) accountShow() (*cmdpb.DefaultResp, error) {
+	cfg := config.GetCSC()
+
+	msg:="please create account"
+
+	if cfg.PubKey != nil{
+		msg=address.ToAddress(cfg.PubKey).String()
+	}
+
+	return encapResp(msg), nil
+}
+
+func (cds *CmdDefaultServer) serverRun() (*cmdpb.DefaultResp, error) {
+	if config.GetCSC().PubKey == nil || config.GetCSC().PrivKey == nil{
+		return encapResp("bmtp need account"),nil
+	}
+
+	go httpservice.StartWebDaemon()
+
+	return encapResp("Server running"), nil
 }

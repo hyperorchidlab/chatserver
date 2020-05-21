@@ -16,41 +16,37 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/kprc/chatserver/app/cmdclient"
-	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/spf13/cobra"
 	"log"
+	"github.com/kprc/chatserver/app/cmdcommon"
+	"github.com/kprc/chatserver/app/cmdclient"
 )
 
-// exampleCmd represents the example command
-var exampleCmd = &cobra.Command{
-	Use:   "example",
-	Short: "show example",
-	Long:  `show example`,
+// accountCmd represents the account command
+var accountCmd = &cobra.Command{
+	Use:   "account",
+	Short: "show account",
+	Long: `show account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
 			return
 		}
 
-		if len(args) == 0 {
-			cmdclient.StringOpCmdSend("", cmdcommon.CMD_EXAMPLE, "")
-		} else {
-			cmdclient.StringOpCmdSend("", cmdcommon.CMD_EXAMPLE, args[0])
-		}
+		cmdclient.DefaultCmdSend("", cmdcommon.CMD_PK_SHOW)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(exampleCmd)
+	rootCmd.AddCommand(accountCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// exampleCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// accountCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// exampleCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// accountCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

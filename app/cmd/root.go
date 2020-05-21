@@ -25,6 +25,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"log"
+	"github.com/kprc/chatserver/httpservice"
+	"github.com/kprc/chatserver/chatcrypt"
 )
 
 ////var cfgFile string
@@ -50,27 +52,16 @@ var rootCmd = &cobra.Command{
 		cfg := config.GetCSC()
 		cfg.Save()
 
-		//if keypassword == "" {
-		//	if keypassword, err = inputpassword(); err != nil {
-		//		log.Println(err)
-		//		return
-		//	}
-		//}
-		//
-		//if keypassword == "" {
-		//	log.Println("Please input password")
-		//	return
-		//}
-		//
-		//if priv, pub, err := rsakey.LoadRSAKey(cfg.GetKeyPath(), []byte(keypassword)); err != nil {
-		//	log.Println("Recover RSA Key Failed")
-		//	return
-		//} else {
-		//	cfg.SetPrivKey(priv)
-		//	cfg.SetPubKey(pub)
-		//
-		//	cfg.PKAddr = rsakey.PubKey2Addr(pub)
-		//}
+		if keypassword == "" {
+			if keypassword, err = inputpassword(); err != nil {
+				log.Println(err)
+				return
+			}
+		}
+
+		chatcrypt.LoadKey(keypassword)
+
+		go httpservice.StartWebDaemon()
 
 		cmdservice.GetCmdServerInst().StartCmdService()
 	},

@@ -9,9 +9,9 @@ import (
 	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/chatserver/db"
-	"github.com/kprc/chatserver/ed25519"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/nbsnetwork/tools"
+	"github.com/kprc/chatserver/chatcrypt"
 )
 
 type MessageDispatch struct {
@@ -76,7 +76,6 @@ func (uc *MessageDispatch)ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	//log.Println("response:",string(bresp))
 	w.WriteHeader(200)
 	w.Write(bresp)
 
@@ -111,7 +110,7 @@ func ValidateSig(sp *protocol.SignPack) bool {
 		return false
 	}
 
-	if !ed25519.Verify(cfg.PubKey,data,base58.Decode(sp.Sign)){
+	if !chatcrypt.Verify(cfg.PubKey,data,base58.Decode(sp.Sign)){
 		return false
 	}
 

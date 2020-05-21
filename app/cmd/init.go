@@ -16,40 +16,37 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
-	"github.com/howeyc/gopass"
 	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/kprc/chatserver/config"
 
 	"github.com/spf13/cobra"
 	"log"
-	"os"
 )
 
 
 var remoteserver string
-
-func inputpassword() (password string, err error) {
-	passwd, err := gopass.GetPasswdPrompt("Please Enter Password:", true, os.Stdin, os.Stdout)
-	if err != nil {
-		return "", err
-	}
-
-	if len(passwd) < 1 {
-		return "", errors.New("Please input valid password")
-	}
-
-	return string(passwd), nil
-}
-
-func inputChoose() (choose string, err error) {
-	c, err := gopass.GetPasswdPrompt("Do you reinit config[yes/no]: ", true, os.Stdin, os.Stdout)
-	if err != nil {
-		return "", err
-	}
-
-	return string(c), nil
-}
+//
+//func inputpassword() (password string, err error) {
+//	passwd, err := gopass.GetPasswdPrompt("Please Enter Password:", true, os.Stdin, os.Stdout)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	if len(passwd) < 1 {
+//		return "", errors.New("Please input valid password")
+//	}
+//
+//	return string(passwd), nil
+//}
+//
+//func inputChoose() (choose string, err error) {
+//	c, err := gopass.GetPasswdPrompt("Do you reinit config[yes/no]: ", true, os.Stdin, os.Stdout)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return string(c), nil
+//}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{

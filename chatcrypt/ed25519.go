@@ -1,4 +1,4 @@
-package ed25519
+package chatcrypt
 
 import (
 	"crypto/aes"

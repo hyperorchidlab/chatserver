@@ -13,6 +13,7 @@ import (
 	"github.com/kprc/chatserver/app/cmdpb"
 	"github.com/kprc/chatserver/app/cmdservice/api"
 	"github.com/kprc/chatserver/config"
+	"github.com/kprc/chatserver/httpservice"
 )
 
 type cmdServer struct {
@@ -78,11 +79,14 @@ func (cs *cmdServer) StopCmdService() {
 	//server.DNSServerStop()
 	//dohserver.GetDohDaemonServer().ShutDown()
 	//mem.MemStateStop()
+
 	cs.grpcServer.Stop()
 	log.Println("Command line server stoped")
 }
 
 func stop() {
+
+	httpservice.StopWebDaemon()
 	GetCmdServerInst().StopCmdService()
 
 }
