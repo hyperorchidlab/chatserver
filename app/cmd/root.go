@@ -23,10 +23,10 @@ import (
 
 	"github.com/kprc/chatserver/app/cmdservice"
 
+	"github.com/kprc/chatserver/chatcrypt"
+	"github.com/kprc/chatserver/httpservice"
 	"github.com/spf13/cobra"
 	"log"
-	"github.com/kprc/chatserver/httpservice"
-	"github.com/kprc/chatserver/chatcrypt"
 )
 
 ////var cfgFile string
@@ -52,7 +52,7 @@ var rootCmd = &cobra.Command{
 		cfg := config.GetCSC()
 		cfg.Save()
 
-		if !chatcrypt.KeyIsGenerated(){
+		if !chatcrypt.KeyIsGenerated() {
 			log.Println("please create account first")
 			return
 		}

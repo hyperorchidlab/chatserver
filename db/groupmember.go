@@ -1,12 +1,12 @@
 package db
 
 import (
-	"github.com/kprc/nbsnetwork/db"
-	"sync"
-	"github.com/kprc/chatserver/config"
-	"github.com/pkg/errors"
-	"github.com/kprc/nbsnetwork/tools"
 	"encoding/json"
+	"github.com/kprc/chatserver/config"
+	"github.com/kprc/nbsnetwork/db"
+	"github.com/kprc/nbsnetwork/tools"
+	"github.com/pkg/errors"
+	"sync"
 )
 
 type ChatGroupMemberDB struct {
@@ -15,34 +15,32 @@ type ChatGroupMemberDB struct {
 	cursor *db.DBCusor
 }
 
-
 var (
-	cgmStore *ChatGroupMemberDB
+	cgmStore     *ChatGroupMemberDB
 	cgmStoreLock sync.Mutex
 )
 
-
 type GroupMember struct {
-	GrpID string	`json:"-"`
-	Owner string    `json:"owr"`
-	Members []string `json:"mbrs"`
-	CreateTime int64 `json:"ct"`
-	UpdateTime int64 `json:"ut"`
+	GrpID      string   `json:"-"`
+	Owner      string   `json:"owr"`
+	Members    []string `json:"mbrs"`
+	CreateTime int64    `json:"ct"`
+	UpdateTime int64    `json:"ut"`
 }
 
 func newChatGroupMemberDB() *ChatGroupMemberDB {
-	cfg:=config.GetCSC()
-	db:=db.NewFileDb(cfg.GetGrpMbrsDbPath()).Load()
+	cfg := config.GetCSC()
+	db := db.NewFileDb(cfg.GetGrpMbrsDbPath()).Load()
 
-	return &ChatGroupMemberDB{NbsDbInter:db}
+	return &ChatGroupMemberDB{NbsDbInter: db}
 }
 
-func GetChatGrpMbrsDB() *ChatGroupMemberDB  {
-	if cgmStore == nil{
+func GetChatGrpMbrsDB() *ChatGroupMemberDB {
+	if cgmStore == nil {
 		cgmStoreLock.Lock()
 		defer cgmStoreLock.Unlock()
 
-		if cgmStore == nil{
+		if cgmStore == nil {
 			cgmStore = newChatGroupMemberDB()
 		}
 
@@ -51,80 +49,80 @@ func GetChatGrpMbrsDB() *ChatGroupMemberDB  {
 	return cgmStore
 }
 
-func (cgm *ChatGroupMemberDB)Insert(grpId string,owner string) error {
+func (cgm *ChatGroupMemberDB) Insert(grpId string, owner string) error {
 	cgm.dbLock.Lock()
 	defer cgm.dbLock.Unlock()
 
-	if _,err:=cgm.NbsDbInter.Find(grpId);err == nil{
+	if _, err := cgm.NbsDbInter.Find(grpId); err == nil {
 		return errors.New("group id is in db")
 	}
-	now:=tools.GetNowMsTime()
-	gm:=&GroupMember{}
+	now := tools.GetNowMsTime()
+	gm := &GroupMember{}
 	gm.Owner = owner
-	gm.Members = append(gm.Members,owner)
+	gm.Members = append(gm.Members, owner)
 	gm.CreateTime = now
 	gm.UpdateTime = now
 
-	if v,err:=json.Marshal(*gm);err!=nil{
+	if v, err := json.Marshal(*gm); err != nil {
 		return err
-	}else{
-		return cgm.NbsDbInter.Insert(grpId,string(v))
+	} else {
+		return cgm.NbsDbInter.Insert(grpId, string(v))
 	}
 }
 
-func (cgm *ChatGroupMemberDB)AddMember(grpId string ,mbr string) error  {
+func (cgm *ChatGroupMemberDB) AddMember(grpId string, mbr string) error {
 	cgm.dbLock.Lock()
 	defer cgm.dbLock.Unlock()
 
-	if v,err:=cgm.NbsDbInter.Find(grpId);err != nil{
+	if v, err := cgm.NbsDbInter.Find(grpId); err != nil {
 		return err
-	}else{
+	} else {
 		gm := &GroupMember{}
 
-		err=json.Unmarshal([]byte(v),gm)
-		if err != nil{
+		err = json.Unmarshal([]byte(v), gm)
+		if err != nil {
 			return err
 		}
 
-		for i:=0;i<len(gm.Members);i++{
-			if mbr == gm.Members[i]{
+		for i := 0; i < len(gm.Members); i++ {
+			if mbr == gm.Members[i] {
 				return nil
 			}
 		}
 
-		gm.Members = append(gm.Members,mbr)
+		gm.Members = append(gm.Members, mbr)
 
 		var vv []byte
 
-		if vv,err = json.Marshal(*gm);err!=nil{
+		if vv, err = json.Marshal(*gm); err != nil {
 			return err
 		}
 
-		cgm.NbsDbInter.Update(grpId,string(vv))
+		cgm.NbsDbInter.Update(grpId, string(vv))
 
 	}
 
 	return nil
 }
 
-func (cgm *ChatGroupMemberDB)DelMember(grpId string,mbr string) error  {
+func (cgm *ChatGroupMemberDB) DelMember(grpId string, mbr string) error {
 	cgm.dbLock.Lock()
 	defer cgm.dbLock.Unlock()
 
-	if v,err:=cgm.NbsDbInter.Find(grpId);err != nil{
+	if v, err := cgm.NbsDbInter.Find(grpId); err != nil {
 		return err
-	}else{
+	} else {
 		gm := &GroupMember{}
 
-		err=json.Unmarshal([]byte(v),gm)
-		if err != nil{
+		err = json.Unmarshal([]byte(v), gm)
+		if err != nil {
 			return err
 		}
 
 		var dflag bool
-		for i:=0;i<len(gm.Members);i++{
-			if mbr == gm.Members[i]{
-				if i != len(gm.Members) - 1{
+		for i := 0; i < len(gm.Members); i++ {
+			if mbr == gm.Members[i] {
+				if i != len(gm.Members)-1 {
 					gm.Members[i] = gm.Members[len(gm.Members)-1]
 				}
 				gm.Members = gm.Members[:len(gm.Members)-1]
@@ -133,40 +131,39 @@ func (cgm *ChatGroupMemberDB)DelMember(grpId string,mbr string) error  {
 			}
 		}
 
-		if !dflag{
+		if !dflag {
 			return nil
 		}
 
 		var vv []byte
 
-		if vv,err = json.Marshal(*gm);err!=nil{
+		if vv, err = json.Marshal(*gm); err != nil {
 			return err
 		}
 
-		cgm.NbsDbInter.Update(grpId,string(vv))
+		cgm.NbsDbInter.Update(grpId, string(vv))
 
 	}
 
 	return nil
 
-
 }
 
-func (cgm *ChatGroupMemberDB)DelGroupMember(grpId string) error {
+func (cgm *ChatGroupMemberDB) DelGroupMember(grpId string) error {
 	cgm.dbLock.Lock()
 	defer cgm.dbLock.Unlock()
 
-	if v,err:=cgm.NbsDbInter.Find(grpId);err != nil{
+	if v, err := cgm.NbsDbInter.Find(grpId); err != nil {
 		return nil
-	}else{
+	} else {
 		gm := &GroupMember{}
 
-		err=json.Unmarshal([]byte(v),gm)
-		if err != nil{
+		err = json.Unmarshal([]byte(v), gm)
+		if err != nil {
 			return err
 		}
 
-		if len(gm.Members)>0{
+		if len(gm.Members) > 0 {
 			return errors.New("group have members")
 		}
 
@@ -176,8 +173,6 @@ func (cgm *ChatGroupMemberDB)DelGroupMember(grpId string) error {
 
 	return nil
 }
-
-
 
 func (cgm *ChatGroupMemberDB) Find(grpId string) (*GroupMember, error) {
 	cgm.dbLock.Unlock()
@@ -198,8 +193,6 @@ func (cgm *ChatGroupMemberDB) Find(grpId string) (*GroupMember, error) {
 	}
 
 }
-
-
 
 func (cgm *ChatGroupMemberDB) Iterator() {
 

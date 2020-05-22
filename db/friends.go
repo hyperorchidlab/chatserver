@@ -2,11 +2,11 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/nbsnetwork/db"
 	"github.com/kprc/nbsnetwork/tools"
 	"sync"
-	"errors"
 )
 
 type ChatFriendsDb struct {
@@ -28,7 +28,7 @@ type Friend struct {
 }
 
 type ChatFriends struct {
-	Owner string	`json:"-"`
+	Owner   string   `json:"-"`
 	Friends []Friend `json:"fs"`
 	Groups  []string `json:"gs"`
 }
@@ -89,7 +89,7 @@ func (cf *ChatFriendsDb) AddFriend(ownerPk string, friendPK string) error {
 	return nil
 }
 
-func (cf *ChatFriendsDb)AgreeFriend(ownerPk string,friendPk string,agree bool) error  {
+func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool) error {
 	cf.dbLock.Lock()
 	defer cf.dbLock.Unlock()
 
@@ -104,31 +104,30 @@ func (cf *ChatFriendsDb)AgreeFriend(ownerPk string,friendPk string,agree bool) e
 	cfs.Owner = ownerPk
 
 	var i int
-	for i = 0; i < len(cfs.Friends); i++{
-		if friendPk == cfs.Friends[i].PubKey{
+	for i = 0; i < len(cfs.Friends); i++ {
+		if friendPk == cfs.Friends[i].PubKey {
 			cfs.Friends[i].Agree = agree
 		}
 	}
 
-	if i == len(cfs.Friends){
+	if i == len(cfs.Friends) {
 		f := &Friend{}
 		f.PubKey = friendPk
 		f.AddTime = tools.GetNowMsTime()
 		f.Agree = agree
 
-		cfs.Friends = append(cfs.Friends,*f)
+		cfs.Friends = append(cfs.Friends, *f)
 	}
 
-	if v,err:=json.Marshal(cfs); err!=nil{
+	if v, err := json.Marshal(cfs); err != nil {
 		return err
-	}else{
-		cf.NbsDbInter.Update(ownerPk,string(v))
+	} else {
+		cf.NbsDbInter.Update(ownerPk, string(v))
 	}
 
 	return nil
 
 }
-
 
 func (cf *ChatFriendsDb) DelFriend(ownerPK string, friendPK string) error {
 	cf.dbLock.Lock()
@@ -227,7 +226,7 @@ func (cf *ChatFriendsDb) Find(ownerPk string) (*ChatFriends, error) {
 	}
 }
 
-func (cf *ChatFriendsDb)FindFriend(ownerPk string, friend string) (*Friend,error)  {
+func (cf *ChatFriendsDb) FindFriend(ownerPk string, friend string) (*Friend, error) {
 	cf.dbLock.Lock()
 	defer cf.dbLock.Unlock()
 
@@ -239,17 +238,17 @@ func (cf *ChatFriendsDb)FindFriend(ownerPk string, friend string) (*Friend,error
 			return nil, err
 		}
 		//cfs.Owner = ownerPk
-		for i:=0;i<len(cfs.Friends);i++{
-			if cfs.Friends[i].PubKey == friend{
-				return &cfs.Friends[i],err
+		for i := 0; i < len(cfs.Friends); i++ {
+			if cfs.Friends[i].PubKey == friend {
+				return &cfs.Friends[i], err
 			}
 		}
 	}
 
-	return nil,errors.New("Not Found")
+	return nil, errors.New("Not Found")
 }
 
-func (cf *ChatFriendsDb)FindGroup(ownerPk string,grpId string) (string,error)  {
+func (cf *ChatFriendsDb) FindGroup(ownerPk string, grpId string) (string, error) {
 	cf.dbLock.Lock()
 	defer cf.dbLock.Unlock()
 
@@ -261,16 +260,15 @@ func (cf *ChatFriendsDb)FindGroup(ownerPk string,grpId string) (string,error)  {
 			return "", err
 		}
 		//cfs.Owner = ownerPk
-		for i:=0;i<len(cfs.Groups);i++{
-			if cfs.Groups[i] == grpId{
-				return cfs.Groups[i],err
+		for i := 0; i < len(cfs.Groups); i++ {
+			if cfs.Groups[i] == grpId {
+				return cfs.Groups[i], err
 			}
 		}
 	}
 
-	return "",errors.New("Not Found")
+	return "", errors.New("Not Found")
 }
-
 
 func (s *ChatFriendsDb) Save() {
 

@@ -16,17 +16,17 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/kprc/chatserver/app/cmdclient"
+	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/spf13/cobra"
 	"log"
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdclient"
 )
 
 // accountCmd represents the account command
 var accountCmd = &cobra.Command{
 	Use:   "account",
 	Short: "show account",
-	Long: `show account`,
+	Long:  `show account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)

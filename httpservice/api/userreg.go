@@ -1,21 +1,20 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"encoding/json"
+	"net/http"
 
-	"github.com/kprc/chatserver/db"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/chat-protocol/protocol"
-	"github.com/kprc/chat-protocol/address"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/chat-protocol/address"
+	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chatserver/chatcrypt"
+	"github.com/kprc/chatserver/config"
+	"github.com/kprc/chatserver/db"
 )
 
 type UserRegister struct {
-
 }
 
 //const (
@@ -56,8 +55,8 @@ func (ur *UserRegister) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "{}")
 		return
 	}
-	addr:=address.ChatAddress(req.CPubKey)
-	if !addr.IsValid(){
+	addr := address.ChatAddress(req.CPubKey)
+	if !addr.IsValid() {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "{}")
 		return
@@ -65,31 +64,31 @@ func (ur *UserRegister) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	resp := &protocol.UserRegResp{}
 
-	userdb:=db.GetChatUserDB()
+	userdb := db.GetChatUserDB()
 
-	_,err =userdb.Find(req.CPubKey)
-	if err != nil{
-		err = userdb.Insert(req.AliasName,req.CPubKey,req.TimeInterval)
-	}else{
-		err = userdb.Update(req.AliasName,req.CPubKey,req.TimeInterval)
+	_, err = userdb.Find(req.CPubKey)
+	if err != nil {
+		err = userdb.Insert(req.AliasName, req.CPubKey, req.TimeInterval)
+	} else {
+		err = userdb.Update(req.AliasName, req.CPubKey, req.TimeInterval)
 	}
 
-	if err!=nil{
+	if err != nil {
 		resp.ErrCode = 1
-	}else{
+	} else {
 
 		var user *db.ChatUser
-		if user,err = userdb.Find(req.CPubKey);err!=nil{
-			resp.ErrCode  = 1
-		}else{
+		if user, err = userdb.Find(req.CPubKey); err != nil {
+			resp.ErrCode = 1
+		} else {
 			resp.SP.SignText.AliasName = req.AliasName
 			resp.SP.SignText.CPubKey = req.CPubKey
 			resp.SP.SignText.ExpireTime = user.ExpireTinme
 			resp.SP.SignText.SPubKey = address.ToAddress(config.GetCSC().PubKey).String()
 
-			signtxt,_:=json.Marshal(resp.SP.SignText)
+			signtxt, _ := json.Marshal(resp.SP.SignText)
 
-			resp.SP.Sign = base58.Encode(chatcrypt.Sign(config.GetCSC().PrivKey,signtxt))
+			resp.SP.Sign = base58.Encode(chatcrypt.Sign(config.GetCSC().PrivKey, signtxt))
 
 		}
 
@@ -109,4 +108,3 @@ func (ur *UserRegister) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write(bresp)
 
 }
-

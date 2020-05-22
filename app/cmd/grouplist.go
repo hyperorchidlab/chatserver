@@ -16,9 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/kprc/chatserver/app/cmdclient"
+	"github.com/kprc/chatserver/app/cmdcommon"
+	"github.com/spf13/cobra"
 	"log"
 )
 
@@ -26,20 +26,20 @@ import (
 var grouplistCmd = &cobra.Command{
 	Use:   "grouplist",
 	Short: "list group",
-	Long: `list all groups in db or show one group with group id`,
+	Long:  `list all groups in db or show one group with group id`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
 			return
 		}
 
-		if len(args) > 1{
+		if len(args) > 1 {
 			log.Println("command error")
 		}
 
-		if len(args) == 0{
+		if len(args) == 0 {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GROUP, "")
-		}else{
+		} else {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GROUP, args[0])
 		}
 		//cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GROUP, keypassword)

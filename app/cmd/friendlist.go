@@ -16,9 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/kprc/chatserver/app/cmdclient"
 	"github.com/kprc/chatserver/app/cmdcommon"
+	"github.com/spf13/cobra"
 	"log"
 )
 
@@ -26,20 +26,20 @@ import (
 var friendlistCmd = &cobra.Command{
 	Use:   "friendlist",
 	Short: "list friend",
-	Long: `list all friend in db or list friends of one user with chat address`,
+	Long:  `list all friend in db or list friends of one user with chat address`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
 			return
 		}
 
-		if len(args) > 1{
+		if len(args) > 1 {
 			log.Println("command error")
 		}
 
-		if len(args) == 0{
+		if len(args) == 0 {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_FRIEND, "")
-		}else{
+		} else {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_FRIEND, args[0])
 		}
 

@@ -16,33 +16,32 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/kprc/chatserver/app/cmdclient"
+	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/spf13/cobra"
 	"log"
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdclient"
 )
 
 // usrlistCmd represents the usrlist command
 var usrlistCmd = &cobra.Command{
 	Use:   "usrlist",
 	Short: "list user ",
-	Long: `list all user or list one user with chat address `,
+	Long:  `list all user or list one user with chat address `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
 			return
 		}
 
-		if len(args) > 1{
+		if len(args) > 1 {
 			log.Println("command error")
 		}
 
-		if len(args) == 0{
+		if len(args) == 0 {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_USER, "")
-		}else{
+		} else {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_USER, args[0])
 		}
-
 
 	},
 }

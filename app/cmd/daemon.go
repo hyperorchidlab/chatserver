@@ -52,8 +52,6 @@ var daemonCmd = &cobra.Command{
 		//	}
 		//}
 
-
-
 		daemondir := config.GetCSCHomeDir()
 		cntxt := daemon.Context{
 			PidFileName: path.Join(daemondir, "chatserver.pid"),

@@ -12,12 +12,11 @@ import (
 
 var webserver *http.Server
 
-
 func StartWebDaemon() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/ajax/userreg", &api.UserRegister{})
-	mux.Handle("/ajax/cmd",&api.MessageDispatch{})
+	mux.Handle("/ajax/cmd", &api.MessageDispatch{})
 
 	addr := ":" + strconv.Itoa(config.GetCSC().MgtHttpPort)
 

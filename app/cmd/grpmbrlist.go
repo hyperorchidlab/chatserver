@@ -16,29 +16,29 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/kprc/chatserver/app/cmdclient"
+	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/spf13/cobra"
 	"log"
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdclient"
 )
 
 // grpmbrlistCmd represents the grpmbrlist command
 var grpmbrlistCmd = &cobra.Command{
 	Use:   "grpmbrlist",
 	Short: "list group member ",
-	Long: `list all group member in db or show group members with group id`,
+	Long:  `list all group member in db or show group members with group id`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
 			return
 		}
-		if len(args) > 1{
+		if len(args) > 1 {
 			log.Println("command error")
 		}
 
-		if len(args) == 0{
+		if len(args) == 0 {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GRPMBR, "")
-		}else{
+		} else {
 			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GRPMBR, args[0])
 		}
 

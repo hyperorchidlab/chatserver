@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"github.com/BASChain/go-account"
 	"github.com/BASChain/go-account/edwards25519"
+	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/nbsnetwork/tools"
 	"golang.org/x/crypto/curve25519"
 	"io"
 	"log"
-	"github.com/kprc/chat-protocol/address"
 )
 
 type KeyJson struct {

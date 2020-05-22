@@ -23,8 +23,8 @@ import (
 	"log"
 )
 
-
 var remoteserver string
+
 //
 //func inputpassword() (password string, err error) {
 //	passwd, err := gopass.GetPasswdPrompt("Please Enter Password:", true, os.Stdin, os.Stdout)

@@ -2,8 +2,8 @@ package cmdcommon
 
 import (
 	"errors"
-	"github.com/kprc/nbsnetwork/tools"
 	"github.com/kprc/chatserver/config"
+	"github.com/kprc/nbsnetwork/tools"
 )
 
 func IsProcessCanStarted() (bool, error) {

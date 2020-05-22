@@ -1,13 +1,13 @@
 package config
 
 import (
+	"crypto/ed25519"
 	"encoding/json"
 	"github.com/kprc/nbsnetwork/tools"
 	"log"
 	"os"
 	"path"
 	"sync"
-	"crypto/ed25519"
 )
 
 const (
@@ -16,22 +16,22 @@ const (
 )
 
 type ChatServerConfig struct {
-	MgtHttpPort   int             `json:"mgthttpport"`
+	MgtHttpPort int `json:"mgthttpport"`
 
-	CmdListenPort string          `json:"cmdlistenport"`
+	CmdListenPort string `json:"cmdlistenport"`
 
-	DBPath string					`json:"dbpath"`
-	UsersDBFile string				`json:"usersdbfile"`
-	FriendsDBFile string			`json:"friendsdbfile"`
-	GroupsDBFile string				`json:"groupsdbfile"`
-	GrpMemberDBFile string          `json:"grpmemberdbfile"`
-	
-	ChatListenPort int			`json:"chatport"`
+	DBPath          string `json:"dbpath"`
+	UsersDBFile     string `json:"usersdbfile"`
+	FriendsDBFile   string `json:"friendsdbfile"`
+	GroupsDBFile    string `json:"groupsdbfile"`
+	GrpMemberDBFile string `json:"grpmemberdbfile"`
+
+	ChatListenPort int `json:"chatport"`
 	//ChatMgmtPort   int			`json:"chatmgmtport"`
-	KeyFile string 				`json:"keyfile"`
+	KeyFile string `json:"keyfile"`
 
-	PrivKey ed25519.PrivateKey   `json:"-"`
-	PubKey  ed25519.PublicKey	`json:"-"`
+	PrivKey ed25519.PrivateKey `json:"-"`
+	PubKey  ed25519.PublicKey  `json:"-"`
 }
 
 var (
@@ -177,38 +177,37 @@ func (bc *ChatServerConfig) Save() {
 
 }
 
-func (bc *ChatServerConfig)getDbPath() string  {
-	dbpath:= path.Join(GetCSCHomeDir(),bc.DBPath)
+func (bc *ChatServerConfig) getDbPath() string {
+	dbpath := path.Join(GetCSCHomeDir(), bc.DBPath)
 
-	if tools.FileExists(dbpath){
+	if tools.FileExists(dbpath) {
 		return dbpath
-	}else{
-		os.MkdirAll(dbpath,0755)
+	} else {
+		os.MkdirAll(dbpath, 0755)
 	}
 
 	return dbpath
 }
 
-func (bc *ChatServerConfig)GetUsersDbPath() string  {
-	return path.Join(bc.getDbPath(),bc.UsersDBFile)
+func (bc *ChatServerConfig) GetUsersDbPath() string {
+	return path.Join(bc.getDbPath(), bc.UsersDBFile)
 }
 
-func (bc *ChatServerConfig)GetFriendsDbPath() string  {
-	return path.Join(bc.getDbPath(),bc.FriendsDBFile)
+func (bc *ChatServerConfig) GetFriendsDbPath() string {
+	return path.Join(bc.getDbPath(), bc.FriendsDBFile)
 }
 
-func (bc *ChatServerConfig)GetGroupsDbPath() string  {
-	return path.Join(bc.getDbPath(),bc.GroupsDBFile)
+func (bc *ChatServerConfig) GetGroupsDbPath() string {
+	return path.Join(bc.getDbPath(), bc.GroupsDBFile)
 }
 
-func (bc *ChatServerConfig)GetKeyPath() string  {
-	return path.Join(GetCSCHomeDir(),bc.KeyFile)
+func (bc *ChatServerConfig) GetKeyPath() string {
+	return path.Join(GetCSCHomeDir(), bc.KeyFile)
 }
 
-func (bc *ChatServerConfig)GetGrpMbrsDbPath() string  {
-	return path.Join(bc.getDbPath(),bc.GrpMemberDBFile)
+func (bc *ChatServerConfig) GetGrpMbrsDbPath() string {
+	return path.Join(bc.getDbPath(), bc.GrpMemberDBFile)
 }
-
 
 func IsInitialized() bool {
 	if tools.FileExists(GetCSCFGFile()) {

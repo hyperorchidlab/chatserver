@@ -9,9 +9,9 @@ import (
 
 	"github.com/kprc/chatserver/config"
 
+	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/kprc/chatserver/app/cmdpb"
-	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chatserver/httpservice"
 )
 
@@ -73,22 +73,21 @@ func (cds *CmdDefaultServer) configShow() (*cmdpb.DefaultResp, error) {
 	return encapResp(string(bapc)), nil
 }
 
-
 func (cds *CmdDefaultServer) accountShow() (*cmdpb.DefaultResp, error) {
 	cfg := config.GetCSC()
 
-	msg:="please create account"
+	msg := "please create account"
 
-	if cfg.PubKey != nil{
-		msg=address.ToAddress(cfg.PubKey).String()
+	if cfg.PubKey != nil {
+		msg = address.ToAddress(cfg.PubKey).String()
 	}
 
 	return encapResp(msg), nil
 }
 
 func (cds *CmdDefaultServer) serverRun() (*cmdpb.DefaultResp, error) {
-	if config.GetCSC().PubKey == nil || config.GetCSC().PrivKey == nil{
-		return encapResp("chat server need account"),nil
+	if config.GetCSC().PubKey == nil || config.GetCSC().PrivKey == nil {
+		return encapResp("chat server need account"), nil
 	}
 
 	go httpservice.StartWebDaemon()

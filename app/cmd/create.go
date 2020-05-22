@@ -16,20 +16,17 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/howeyc/gopass"
-	"os"
-	"log"
-	"github.com/kprc/chatserver/app/cmdcommon"
 	"errors"
+	"github.com/howeyc/gopass"
 	"github.com/kprc/chatserver/app/cmdclient"
+	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/kprc/chatserver/chatcrypt"
+	"github.com/spf13/cobra"
+	"log"
+	"os"
 )
 
-
-
 var keypassword string
-
 
 func inputpassword() (password string, err error) {
 	passwd, err := gopass.GetPasswdPrompt("Please Enter Password: ", true, os.Stdin, os.Stdout)
@@ -53,12 +50,11 @@ func inputChoose() (choose string, err error) {
 	return string(c), nil
 }
 
-
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create account",
-	Long: `create account`,
+	Long:  `create account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
