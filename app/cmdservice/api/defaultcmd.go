@@ -88,7 +88,7 @@ func (cds *CmdDefaultServer) accountShow() (*cmdpb.DefaultResp, error) {
 
 func (cds *CmdDefaultServer) serverRun() (*cmdpb.DefaultResp, error) {
 	if config.GetCSC().PubKey == nil || config.GetCSC().PrivKey == nil{
-		return encapResp("bmtp need account"),nil
+		return encapResp("chat server need account"),nil
 	}
 
 	go httpservice.StartWebDaemon()

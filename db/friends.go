@@ -293,7 +293,7 @@ func (s *ChatFriendsDb) Next() (key string, meta *ChatFriends, r1 error) {
 		return
 	}
 	s.dbLock.Lock()
-	s.dbLock.Unlock()
+	//s.dbLock.Unlock()
 	k, v := s.cursor.Next()
 	if k == "" {
 		s.dbLock.Unlock()

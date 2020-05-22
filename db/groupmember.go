@@ -214,7 +214,7 @@ func (cgm *ChatGroupMemberDB) Next() (key string, meta *GroupMember, r1 error) {
 		return
 	}
 	cgm.dbLock.Lock()
-	cgm.dbLock.Unlock()
+	//cgm.dbLock.Unlock()
 	k, v := cgm.cursor.Next()
 	if k == "" {
 		cgm.dbLock.Unlock()

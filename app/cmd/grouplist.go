@@ -16,37 +16,46 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/kprc/chatserver/app/cmdclient"
-	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/spf13/cobra"
+	"github.com/kprc/chatserver/app/cmdcommon"
+	"github.com/kprc/chatserver/app/cmdclient"
 	"log"
 )
 
-// showpkCmd represents the showpk command
-var showpkCmd = &cobra.Command{
-	Use:   "showpk",
-	Short: "show public key",
-	Long:  `show public key`,
+// grouplistCmd represents the grouplist command
+var grouplistCmd = &cobra.Command{
+	Use:   "grouplist",
+	Short: "list group",
+	Long: `list all groups in db or show one group with group id`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := cmdcommon.IsProcessStarted(); err != nil {
 			log.Println(err)
 			return
 		}
 
-		cmdclient.DefaultCmdSend("", cmdcommon.CMD_PK_SHOW)
+		if len(args) > 1{
+			log.Println("command error")
+		}
+
+		if len(args) == 0{
+			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GROUP, "")
+		}else{
+			cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GROUP, args[0])
+		}
+		//cmdclient.StringOpCmdSend("", cmdcommon.CMD_LIST_GROUP, keypassword)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(showpkCmd)
+	rootCmd.AddCommand(grouplistCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// showpkCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// grouplistCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// showpkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// grouplistCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

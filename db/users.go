@@ -232,7 +232,7 @@ func (s *ChatUsersDB) Next() (key string, meta *ChatUser, r1 error) {
 		return
 	}
 	s.dbLock.Lock()
-	s.dbLock.Unlock()
+	//s.dbLock.Unlock()
 	k, v := s.cusor.Next()
 	if k == "" {
 		s.dbLock.Unlock()

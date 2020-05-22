@@ -52,6 +52,11 @@ var rootCmd = &cobra.Command{
 		cfg := config.GetCSC()
 		cfg.Save()
 
+		if !chatcrypt.KeyIsGenerated(){
+			log.Println("please create account first")
+			return
+		}
+
 		if keypassword == "" {
 			if keypassword, err = inputpassword(); err != nil {
 				log.Println(err)
