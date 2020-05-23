@@ -73,7 +73,7 @@ func showUserDetail(u *db.ChatUser) string {
 	msg += fmt.Sprintf("%-24s", u.Alias)
 	msg += fmt.Sprintf("%-22s", int64time2string(u.CreateTime))
 	msg += fmt.Sprintf("%-22s", int64time2string(u.UpdateTime))
-	msg += fmt.Sprintf("%-22s", int64time2string(u.ExpireTinme))
+	msg += fmt.Sprintf("%-22s", int64time2string(u.ExpireTime))
 
 	return msg
 }

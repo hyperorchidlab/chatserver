@@ -21,11 +21,11 @@ var (
 )
 
 type ChatUser struct {
-	Alias       string `json:"as"`
-	PubKey      string `json:"-"`
-	CreateTime  int64  `json:"ct"`
-	UpdateTime  int64  `json:"ut"`
-	ExpireTinme int64  `json:"et"`
+	Alias      string `json:"as"`
+	PubKey     string `json:"-"`
+	CreateTime int64  `json:"ct"`
+	UpdateTime int64  `json:"ut"`
+	ExpireTime int64  `json:"et"`
 }
 
 func newChatUserDb() *ChatUsersDB {
@@ -63,7 +63,7 @@ func (s *ChatUsersDB) Insert(alias string, pubkey string, tv int64) error {
 	cu.PubKey = pubkey
 	cu.CreateTime = now
 	cu.UpdateTime = now
-	cu.ExpireTinme = now + tv
+	cu.ExpireTime = now + tv
 
 	if v, err := json.Marshal(*cu); err != nil {
 		return err
@@ -94,10 +94,10 @@ func (s *ChatUsersDB) Update(alias string, pubkey string, tv int64) error {
 		//cu.CreateTime = now
 		cu.UpdateTime = now
 
-		if now > cu.ExpireTinme {
-			cu.ExpireTinme = now + tv
+		if now > cu.ExpireTime {
+			cu.ExpireTime = now + tv
 		} else {
-			cu.ExpireTinme += tv
+			cu.ExpireTime += tv
 		}
 
 		if v, err := json.Marshal(*cu); err != nil {
@@ -132,10 +132,10 @@ func (s *ChatUsersDB) UpdateExpireTime(pubkey string, tv int64) error {
 		//cu.CreateTime = now
 		cu.UpdateTime = now
 
-		if now > cu.ExpireTinme {
-			cu.ExpireTinme = now + tv
+		if now > cu.ExpireTime {
+			cu.ExpireTime = now + tv
 		} else {
-			cu.ExpireTinme += tv
+			cu.ExpireTime += tv
 		}
 
 		if v, err := json.Marshal(*cu); err != nil {

@@ -121,6 +121,90 @@ func QuitGroup(uc *protocol.UserCommand) *protocol.UCReply {
 
 }
 
+func ListGroupMbrs(uc *protocol.UserCommand) *protocol.UCReply {
+	reply := &protocol.UCReply{}
+	reply.OP = uc.Op
+
+	var (
+		req *protocol.ListGroupMbrsReq
+		err error
+	)
+	if req, err = DecryptListGrpMbrs(uc); err != nil {
+		reply.ResultCode = 1
+		return reply
+	}
+
+	gmdb := db.GetChatGrpMbrsDB()
+	var gm *db.GroupMember
+	gm, err = gmdb.Find(req.LG.GroupId)
+	if err != nil {
+		reply.ResultCode = 1
+		return reply
+	}
+
+	gml := &protocol.GroupMbrDetailsList{}
+
+	for i := 0; i < len(gm.Members); i++ {
+		fPk := gm.Members[i]
+		var u *db.ChatUser
+		fd := &protocol.FriendDetails{}
+		u, err = db.GetChatUserDB().Find(fPk)
+		if err != nil {
+			fd.PubKey = fPk
+			gml.FD = append(gml.FD, *fd)
+			continue
+		}
+
+		////fd.ExpireTime
+		//fd.PubKey = f.PubKey
+		////fd.Alias = f
+		//fd.AddTime = f.AddTime
+		//udb:=db.GetChatUserDB()
+		//var u *db.ChatUser
+		//u,err =udb.Find(f.PubKey)
+		//if err == nil{
+		//	fd.ExpireTime = u.ExpireTime
+		//	fd.Alias = u.Alias
+		//}
+		//var peerf *db.Friend
+		//peerf,err = fdb.FindFriend(fd.PubKey,cf.Owner)
+		//if err == nil{
+		//	fd.Agree = getAgree(f.Agree,peerf.Agree)
+		//}
+		//
+		//fl.FD = append(fl.FD,*fd)
+	}
+
+}
+
+func DecryptListGrpMbrs(uc *protocol.UserCommand) (gd *protocol.ListGroupMbrsReq, err error) {
+	cfg := config.GetCSC()
+
+	cryptbytes := base58.Decode(uc.CipherTxt)
+
+	var (
+		key, plainbytes []byte
+	)
+	key, err = chatcrypt.GenerateAesKey(address.ChatAddress(uc.SP.SignText.CPubKey).ToPubKey(), cfg.PrivKey)
+	if err != nil {
+		return nil, err
+	}
+
+	plainbytes, err = chatcrypt.Decrypt(key, cryptbytes)
+	if err != nil {
+		return nil, err
+	}
+
+	gd = &protocol.ListGroupMbrsReq{}
+
+	err = json.Unmarshal(plainbytes, &gd.LG)
+	if err != nil {
+		return nil, err
+	}
+
+	return gd, nil
+}
+
 func DecryptGroupMbrDesc(uc *protocol.UserCommand) (gd *protocol.GroupMemberReq, err error) {
 	cfg := config.GetCSC()
 

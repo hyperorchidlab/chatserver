@@ -1,32 +1,28 @@
 package main
 
 import (
-	"github.com/kprc/chatserver/ed25519"
 	"fmt"
+	"github.com/kprc/chatserver/ed25519"
 )
 
-func main()  {
-	a:=[]byte{'a'}
-	b:=[]byte{'b'}
-	c:=[]byte{'c'}
+func main() {
+	a := []byte{'a'}
+	b := []byte{'b'}
+	c := []byte{'c'}
 
-	arr:=make([][]byte,0)
-	arr = append(arr,c)
-	arr = append(arr,b)
-	arr = append(arr,a)
+	arr := make([][]byte, 0)
+	arr = append(arr, c)
+	arr = append(arr, b)
+	arr = append(arr, a)
 
-	for i:=0;i<len(arr);i++{
+	for i := 0; i < len(arr); i++ {
 		fmt.Println(string(arr[i]))
 	}
 
-
 	r := chatcrypt.InsertionSortDArray(arr)
 
-	for i:=0;i<len(r);i++{
+	for i := 0; i < len(r); i++ {
 		fmt.Println(string(r[i]))
 	}
 
 }
-
-
-

@@ -83,7 +83,7 @@ func (ur *UserRegister) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			resp.SP.SignText.AliasName = req.AliasName
 			resp.SP.SignText.CPubKey = req.CPubKey
-			resp.SP.SignText.ExpireTime = user.ExpireTinme
+			resp.SP.SignText.ExpireTime = user.ExpireTime
 			resp.SP.SignText.SPubKey = address.ToAddress(config.GetCSC().PubKey).String()
 
 			signtxt, _ := json.Marshal(resp.SP.SignText)

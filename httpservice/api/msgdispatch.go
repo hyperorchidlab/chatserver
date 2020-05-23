@@ -53,6 +53,8 @@ func (uc *MessageDispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		reply = AddFriend(req)
 	case protocol.DelFriend:
 		reply = DelFriend(req)
+	case protocol.ListFriend:
+		reply = ListFriends(req)
 	case protocol.ChgGroup:
 		reply = ChangeGroup(req)
 	case protocol.AddGroup:
@@ -63,6 +65,8 @@ func (uc *MessageDispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		reply = JoinGroup(req)
 	case protocol.QuitGroup:
 		reply = QuitGroup(req)
+	case protocol.ListGroupMbr:
+		reply = ListGroupMbrs(req)
 	}
 
 	var bresp []byte
@@ -93,11 +97,11 @@ func ValidateSig(sp *protocol.SignPack) bool {
 		return false
 	}
 
-	if u.Alias != sp.SignText.AliasName || u.ExpireTinme != sp.SignText.ExpireTime {
+	if u.Alias != sp.SignText.AliasName || u.ExpireTime != sp.SignText.ExpireTime {
 		return false
 	}
 
-	if u.ExpireTinme < tools.GetNowMsTime() {
+	if u.ExpireTime < tools.GetNowMsTime() {
 		return false
 	}
 
