@@ -134,47 +134,73 @@ func ListGroupMbrs(uc *protocol.UserCommand) *protocol.UCReply {
 		return reply
 	}
 
-	gmdb := db.GetChatGrpMbrsDB()
+	//check user in the group id
+	fdb:=db.GetChatFriendsDB()
+	_,err = fdb.FindGroup(uc.SP.SignText.CPubKey,req.LG.GroupId)
+	if err!=nil{
+		reply.ResultCode = 1
+		return reply
+	}
+	gmdb:=db.GetChatGrpMbrsDB()
 	var gm *db.GroupMember
-	gm, err = gmdb.Find(req.LG.GroupId)
+	gm,err = gmdb.Find(req.LG.GroupId)
+	if err != nil{
+		reply.ResultCode = 1
+		return reply
+	}
+
+	gml:=&protocol.GroupMbrDetailsList{}
+
+	for i:=0;i<len(gm.Members);i++{
+		m:=gm.Members[i]
+		mbr:=&protocol.GMember{}
+		mbr.PubKey = m
+		var u *db.ChatUser
+		u,err = db.GetChatUserDB().Find(m)
+		if err != nil{
+			continue
+		}
+		mbr.Alias = u.Alias
+		mbr.ExpireTime = u.ExpireTime
+
+		var ag,bg bool
+
+		var f *db.Friend
+		f,err = db.GetChatFriendsDB().FindFriend(uc.SP.SignText.CPubKey,m)
+		if f != nil{
+			ag = f.Agree
+		}
+		f,err = db.GetChatFriendsDB().FindFriend(m,uc.SP.SignText.CPubKey)
+		if f != nil{
+			bg = f.Agree
+		}
+
+		mbr.Agree = getAgree(ag,bg)
+		gml.FD = append(gml.FD,*mbr)
+	}
+
+	var (
+		key, ciphertxt []byte
+	)
+	cfg := config.GetCSC()
+	key, err = chatcrypt.GenerateAesKey(address.ChatAddress(uc.SP.SignText.CPubKey).ToPubKey(), cfg.PrivKey)
 	if err != nil {
 		reply.ResultCode = 1
 		return reply
 	}
 
-	gml := &protocol.GroupMbrDetailsList{}
+	data, _ := json.Marshal(*gml)
 
-	for i := 0; i < len(gm.Members); i++ {
-		fPk := gm.Members[i]
-		var u *db.ChatUser
-		fd := &protocol.FriendDetails{}
-		u, err = db.GetChatUserDB().Find(fPk)
-		if err != nil {
-			fd.PubKey = fPk
-			gml.FD = append(gml.FD, *fd)
-			continue
-		}
-
-		////fd.ExpireTime
-		//fd.PubKey = f.PubKey
-		////fd.Alias = f
-		//fd.AddTime = f.AddTime
-		//udb:=db.GetChatUserDB()
-		//var u *db.ChatUser
-		//u,err =udb.Find(f.PubKey)
-		//if err == nil{
-		//	fd.ExpireTime = u.ExpireTime
-		//	fd.Alias = u.Alias
-		//}
-		//var peerf *db.Friend
-		//peerf,err = fdb.FindFriend(fd.PubKey,cf.Owner)
-		//if err == nil{
-		//	fd.Agree = getAgree(f.Agree,peerf.Agree)
-		//}
-		//
-		//fl.FD = append(fl.FD,*fd)
+	ciphertxt, err = chatcrypt.Encrypt(key, data)
+	if err != nil {
+		reply.ResultCode = 1
+		return reply
 	}
 
+	reply.CipherTxt = base58.Encode(ciphertxt)
+
+
+	return reply
 }
 
 func DecryptListGrpMbrs(uc *protocol.UserCommand) (gd *protocol.ListGroupMbrsReq, err error) {
