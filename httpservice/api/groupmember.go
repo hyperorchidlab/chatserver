@@ -40,8 +40,6 @@ func JoinGroup(uc *protocol.UserCommand) *protocol.UCReply {
 
 	fdb := db.GetChatFriendsDB()
 
-	//var gs string
-
 	_, err = fdb.FindGroup(uc.SP.SignText.CPubKey, req.GMD.GroupID)
 	if err != nil {
 		reply.ResultCode = 2
@@ -135,48 +133,48 @@ func ListGroupMbrs(uc *protocol.UserCommand) *protocol.UCReply {
 	}
 
 	//check user in the group id
-	fdb:=db.GetChatFriendsDB()
-	_,err = fdb.FindGroup(uc.SP.SignText.CPubKey,req.LG.GroupId)
-	if err!=nil{
+	fdb := db.GetChatFriendsDB()
+	_, err = fdb.FindGroup(uc.SP.SignText.CPubKey, req.LG.GroupId)
+	if err != nil {
 		reply.ResultCode = 1
 		return reply
 	}
-	gmdb:=db.GetChatGrpMbrsDB()
+	gmdb := db.GetChatGrpMbrsDB()
 	var gm *db.GroupMember
-	gm,err = gmdb.Find(req.LG.GroupId)
-	if err != nil{
+	gm, err = gmdb.Find(req.LG.GroupId)
+	if err != nil {
 		reply.ResultCode = 1
 		return reply
 	}
 
-	gml:=&protocol.GroupMbrDetailsList{}
+	gml := &protocol.GroupMbrDetailsList{}
 
-	for i:=0;i<len(gm.Members);i++{
-		m:=gm.Members[i]
-		mbr:=&protocol.GMember{}
+	for i := 0; i < len(gm.Members); i++ {
+		m := gm.Members[i]
+		mbr := &protocol.GMember{}
 		mbr.PubKey = m
 		var u *db.ChatUser
-		u,err = db.GetChatUserDB().Find(m)
-		if err != nil{
+		u, err = db.GetChatUserDB().Find(m)
+		if err != nil {
 			continue
 		}
 		mbr.Alias = u.Alias
 		mbr.ExpireTime = u.ExpireTime
 
-		var ag,bg bool
+		var ag, bg bool
 
 		var f *db.Friend
-		f,err = db.GetChatFriendsDB().FindFriend(uc.SP.SignText.CPubKey,m)
-		if f != nil{
+		f, err = db.GetChatFriendsDB().FindFriend(uc.SP.SignText.CPubKey, m)
+		if f != nil {
 			ag = f.Agree
 		}
-		f,err = db.GetChatFriendsDB().FindFriend(m,uc.SP.SignText.CPubKey)
-		if f != nil{
+		f, err = db.GetChatFriendsDB().FindFriend(m, uc.SP.SignText.CPubKey)
+		if f != nil {
 			bg = f.Agree
 		}
 
-		mbr.Agree = getAgree(ag,bg)
-		gml.FD = append(gml.FD,*mbr)
+		mbr.Agree = getAgree(ag, bg)
+		gml.FD = append(gml.FD, *mbr)
 	}
 
 	var (
@@ -198,7 +196,6 @@ func ListGroupMbrs(uc *protocol.UserCommand) *protocol.UCReply {
 	}
 
 	reply.CipherTxt = base58.Encode(ciphertxt)
-
 
 	return reply
 }
