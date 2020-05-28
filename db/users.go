@@ -65,10 +65,9 @@ func (s *ChatUsersDB) Insert(alias string, pubkey string, tv int64) error {
 	cu.CreateTime = now
 	cu.UpdateTime = now
 
+	nowtm := time.Now().AddDate(0, int(tv), 0)
 
-	nowtm:=time.Now().AddDate(0,int(tv),0)
-
-	cu.ExpireTime = nowtm.UnixNano()/1e6
+	cu.ExpireTime = nowtm.UnixNano() / 1e6
 
 	if v, err := json.Marshal(*cu); err != nil {
 		return err
@@ -100,11 +99,11 @@ func (s *ChatUsersDB) Update(alias string, pubkey string, tv int64) error {
 		cu.UpdateTime = now
 
 		if now > cu.ExpireTime {
-			cu.ExpireTime = (time.Now().AddDate(0,int(tv),0).UnixNano())/1e6
+			cu.ExpireTime = (time.Now().AddDate(0, int(tv), 0).UnixNano()) / 1e6
 		} else {
-			sec:=cu.ExpireTime/1000
-			nsec:=(cu.ExpireTime - sec*1000)*1e6
-			cu.ExpireTime = (time.Unix(sec,nsec).AddDate(0,int(tv),0).UnixNano())/1e6
+			sec := cu.ExpireTime / 1000
+			nsec := (cu.ExpireTime - sec*1000) * 1e6
+			cu.ExpireTime = (time.Unix(sec, nsec).AddDate(0, int(tv), 0).UnixNano()) / 1e6
 		}
 
 		if v, err := json.Marshal(*cu); err != nil {
