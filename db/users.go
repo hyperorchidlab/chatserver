@@ -7,6 +7,7 @@ import (
 	"github.com/kprc/nbsnetwork/db"
 	"github.com/kprc/nbsnetwork/tools"
 	"sync"
+	"time"
 )
 
 type ChatUsersDB struct {
@@ -63,7 +64,11 @@ func (s *ChatUsersDB) Insert(alias string, pubkey string, tv int64) error {
 	cu.PubKey = pubkey
 	cu.CreateTime = now
 	cu.UpdateTime = now
-	cu.ExpireTime = now + tv
+
+
+	nowtm:=time.Now().AddDate(0,int(tv),0)
+
+	cu.ExpireTime = nowtm.UnixNano()/1e6
 
 	if v, err := json.Marshal(*cu); err != nil {
 		return err
@@ -95,9 +100,11 @@ func (s *ChatUsersDB) Update(alias string, pubkey string, tv int64) error {
 		cu.UpdateTime = now
 
 		if now > cu.ExpireTime {
-			cu.ExpireTime = now + tv
+			cu.ExpireTime = (time.Now().AddDate(0,int(tv),0).UnixNano())/1e6
 		} else {
-			cu.ExpireTime += tv
+			sec:=cu.ExpireTime/1000
+			nsec:=(cu.ExpireTime - sec*1000)*1e6
+			cu.ExpireTime = (time.Unix(sec,nsec).AddDate(0,int(tv),0).UnixNano())/1e6
 		}
 
 		if v, err := json.Marshal(*cu); err != nil {
