@@ -139,9 +139,11 @@ func (s *ChatUsersDB) UpdateExpireTime(pubkey string, tv int64) error {
 		cu.UpdateTime = now
 
 		if now > cu.ExpireTime {
-			cu.ExpireTime = now + tv
+			cu.ExpireTime = (time.Now().AddDate(0, int(tv), 0).UnixNano()) / 1e6
 		} else {
-			cu.ExpireTime += tv
+			sec := cu.ExpireTime / 1000
+			nsec := (cu.ExpireTime - sec*1000) * 1e6
+			cu.ExpireTime = (time.Unix(sec, nsec).AddDate(0, int(tv), 0).UnixNano()) / 1e6
 		}
 
 		if v, err := json.Marshal(*cu); err != nil {

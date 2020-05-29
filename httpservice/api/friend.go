@@ -106,6 +106,8 @@ func ListFriends(uc *protocol.UserCommand) *protocol.UCReply {
 
 	fl := protocol.FriendList{}
 
+	fl.UpdateTime = cf.UpdateTime
+
 	for i := 0; i < len(cf.Friends); i++ {
 		f := cf.Friends[i]
 		fd := &protocol.FriendDetails{}

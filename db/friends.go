@@ -28,9 +28,11 @@ type Friend struct {
 }
 
 type ChatFriends struct {
-	Owner   string   `json:"-"`
-	Friends []Friend `json:"fs"`
-	Groups  []string `json:"gs"`
+	Owner      string   `json:"-"`
+	Friends    []Friend `json:"fs"`
+	Groups     []string `json:"gs"`
+	CreateTime int64    `json:"ct"`
+	UpdateTime int64    `json:"ut"`
 }
 
 func newChatFriendsDB() *ChatFriendsDb {
@@ -59,6 +61,7 @@ func (cf *ChatFriendsDb) AddFriend(ownerPk string, friendPK string) error {
 	defer cf.dbLock.Unlock()
 
 	cfs := &ChatFriends{}
+	cfs.CreateTime = tools.GetNowMsTime()
 
 	if vs, err := cf.NbsDbInter.Find(ownerPk); err == nil {
 		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
@@ -74,13 +77,15 @@ func (cf *ChatFriendsDb) AddFriend(ownerPk string, friendPK string) error {
 		}
 	}
 
+	cfs.UpdateTime = tools.GetNowMsTime()
+
 	f := &Friend{}
 	f.PubKey = friendPK
 	f.AddTime = tools.GetNowMsTime()
 
 	cfs.Friends = append(cfs.Friends, *f)
 
-	if v, err := json.Marshal(cfs); err != nil {
+	if v, err := json.Marshal(*cfs); err != nil {
 		return err
 	} else {
 		cf.Update(ownerPk, string(v))
@@ -94,6 +99,7 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 	defer cf.dbLock.Unlock()
 
 	cfs := &ChatFriends{}
+	cfs.CreateTime = tools.GetNowMsTime()
 
 	if vs, err := cf.NbsDbInter.Find(ownerPk); err == nil {
 		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
@@ -102,6 +108,8 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 
 	}
 	cfs.Owner = ownerPk
+
+	cfs.UpdateTime = tools.GetNowMsTime()
 
 	var i int
 	for i = 0; i < len(cfs.Friends); i++ {
@@ -119,7 +127,7 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 		cfs.Friends = append(cfs.Friends, *f)
 	}
 
-	if v, err := json.Marshal(cfs); err != nil {
+	if v, err := json.Marshal(*cfs); err != nil {
 		return err
 	} else {
 		cf.NbsDbInter.Update(ownerPk, string(v))
@@ -140,10 +148,21 @@ func (cf *ChatFriendsDb) DelFriend(ownerPK string, friendPK string) error {
 		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
 			return err
 		}
+		delflag := false
 		for i := 0; i < len(cfs.Friends); i++ {
 			if cfs.Friends[i].PubKey == friendPK {
+				cfs.UpdateTime = tools.GetNowMsTime()
 				cfs.Friends = append(cfs.Friends[:i], cfs.Friends[i+1:]...)
-				return nil
+				delflag = true
+				break
+			}
+		}
+		if delflag {
+			var v []byte
+			if v, err = json.Marshal(*cfs); err != nil {
+				return err
+			} else {
+				cf.NbsDbInter.Update(ownerPK, string(v))
 			}
 		}
 
@@ -166,6 +185,7 @@ func (cf *ChatFriendsDb) AddGroup(ownerPk string, group string) error {
 		}
 	} else {
 		cfs = &ChatFriends{}
+		cfs.CreateTime = tools.GetNowMsTime()
 	}
 
 	for i := 0; i < len(cfs.Groups); i++ {
@@ -173,6 +193,8 @@ func (cf *ChatFriendsDb) AddGroup(ownerPk string, group string) error {
 			return nil
 		}
 	}
+
+	cfs.UpdateTime = tools.GetNowMsTime()
 
 	cfs.Groups = append(cfs.Groups, group)
 
@@ -197,10 +219,24 @@ func (cf *ChatFriendsDb) DelGroup(ownerPK string, group string) error {
 		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
 			return err
 		}
+
+		delflag := false
+
 		for i := 0; i < len(cfs.Groups); i++ {
 			if cfs.Groups[i] == group {
+				cfs.UpdateTime = tools.GetNowMsTime()
 				cfs.Groups = append(cfs.Groups[:i], cfs.Groups[i+1:]...)
+				delflag = true
 				return nil
+			}
+		}
+
+		if delflag {
+			var v []byte
+			if v, err = json.Marshal(*cfs); err != nil {
+				return err
+			} else {
+				cf.NbsDbInter.Update(ownerPK, string(v))
 			}
 		}
 

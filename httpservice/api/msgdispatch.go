@@ -67,6 +67,10 @@ func (uc *MessageDispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		reply = QuitGroup(req)
 	case protocol.ListGroupMbr:
 		reply = ListGroupMbrs(req)
+	case protocol.ListFriendSummary:
+		reply = ListFriendSummary(req)
+	case protocol.ListGroupSummary:
+		reply = ListGroupSummary(req)
 	}
 
 	var bresp []byte

@@ -91,6 +91,7 @@ func (cgm *ChatGroupMemberDB) AddMember(grpId string, mbr string) error {
 		}
 
 		gm.Members = append(gm.Members, mbr)
+		gm.UpdateTime = tools.GetNowMsTime()
 
 		var vv []byte
 
@@ -134,6 +135,8 @@ func (cgm *ChatGroupMemberDB) DelMember(grpId string, mbr string) error {
 		if !dflag {
 			return nil
 		}
+
+		gm.UpdateTime = tools.GetNowMsTime()
 
 		var vv []byte
 

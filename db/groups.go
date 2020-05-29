@@ -114,6 +114,7 @@ func (cg *ChatGroupsDB) IncRefer(grpId string) error {
 			return err
 		}
 		g.RefCnt++
+		g.UpdateTime = tools.GetNowMsTime()
 
 		if v, err := json.Marshal(*g); err != nil {
 			return err
@@ -138,6 +139,7 @@ func (cg *ChatGroupsDB) DecRefer(grpId string) error {
 			return err
 		}
 		g.RefCnt--
+		g.UpdateTime = tools.GetNowMsTime()
 
 		if g.RefCnt <= 0 {
 			cg.NbsDbInter.Delete(grpId)
