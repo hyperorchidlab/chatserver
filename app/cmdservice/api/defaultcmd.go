@@ -13,6 +13,7 @@ import (
 	"github.com/kprc/chatserver/app/cmdcommon"
 	"github.com/kprc/chatserver/app/cmdpb"
 	"github.com/kprc/chatserver/httpservice"
+	"sync"
 )
 
 type CmdDefaultServer struct {
@@ -85,12 +86,25 @@ func (cds *CmdDefaultServer) accountShow() (*cmdpb.DefaultResp, error) {
 	return encapResp(msg), nil
 }
 
+var (
+	runningFlag     bool
+	runningFlagLock sync.Mutex
+)
+
 func (cds *CmdDefaultServer) serverRun() (*cmdpb.DefaultResp, error) {
 	if config.GetCSC().PubKey == nil || config.GetCSC().PrivKey == nil {
 		return encapResp("chat server need account"), nil
 	}
 
-	go httpservice.StartWebDaemon()
+	if !runningFlag {
+		runningFlagLock.Lock()
+		defer runningFlagLock.Unlock()
+
+		if !runningFlag {
+			go httpservice.StartWebDaemon()
+			runningFlag = true
+		}
+	}
 
 	return encapResp("Server running"), nil
 }

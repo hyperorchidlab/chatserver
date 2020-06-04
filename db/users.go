@@ -193,7 +193,7 @@ func (s *ChatUsersDB) UpdateAlias(pubkey string, alias string) error {
 }
 
 func (s *ChatUsersDB) Find(pk string) (*ChatUser, error) {
-	s.dbLock.Unlock()
+	s.dbLock.Lock()
 	defer s.dbLock.Unlock()
 
 	if vs, err := s.NbsDbInter.Find(pk); err != nil {

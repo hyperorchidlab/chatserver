@@ -5,7 +5,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chat-protocol/protocol"
-	"github.com/kprc/chatclient/chatcrypt"
+	"github.com/kprc/chatserver/chatcrypt"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/chatserver/db"
 )

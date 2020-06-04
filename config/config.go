@@ -40,15 +40,14 @@ var (
 )
 
 func (bc *ChatServerConfig) InitCfg() *ChatServerConfig {
-	bc.MgtHttpPort = 50818
-	bc.CmdListenPort = "127.0.0.1:59527"
+	bc.MgtHttpPort = 50101
+	bc.CmdListenPort = "127.0.0.1:50100"
 	bc.DBPath = "/db"
 	bc.UsersDBFile = "users.db"
 	bc.FriendsDBFile = "friends.db"
 	bc.GroupsDBFile = "groups.db"
 	bc.GrpMemberDBFile = "grpm.db"
-	//bc.ChatMgmtPort = 39527
-	bc.ChatListenPort = 39527
+	bc.ChatListenPort = 50102
 	bc.KeyFile = "chat_server.key"
 
 	return bc

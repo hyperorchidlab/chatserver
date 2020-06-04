@@ -65,7 +65,7 @@ func loadAccount(passwd string) string {
 
 func int64time2string(t int64) string {
 	tm := time.Unix(t/1000, 0)
-	return tm.Format("2006-01-02 15:04:05")
+	return tm.Format("2006-01-02/15:04:05")
 }
 
 func showUserDetail(u *db.ChatUser) string {
