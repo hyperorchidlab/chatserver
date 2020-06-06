@@ -121,7 +121,7 @@ func showUser(pk string) string {
 func showFriendDetail(f *db.Friend) string {
 	msg := fmt.Sprintf("%-48s", f.PubKey)
 	msg += fmt.Sprintf("%-21s", int64time2string(f.AddTime))
-	msg += fmt.Sprintf("%-8vv", f.Agree)
+	msg += fmt.Sprintf("%-8v", f.Agree)
 
 	return msg
 }

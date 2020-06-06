@@ -115,6 +115,7 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 	for i = 0; i < len(cfs.Friends); i++ {
 		if friendPk == cfs.Friends[i].PubKey {
 			cfs.Friends[i].Agree = agree
+			break
 		}
 	}
 
