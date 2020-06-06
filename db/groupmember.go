@@ -178,7 +178,7 @@ func (cgm *ChatGroupMemberDB) DelGroupMember(grpId string) error {
 }
 
 func (cgm *ChatGroupMemberDB) Find(grpId string) (*GroupMember, error) {
-	cgm.dbLock.Unlock()
+	cgm.dbLock.Lock()
 	defer cgm.dbLock.Unlock()
 
 	if vs, err := cgm.NbsDbInter.Find(grpId); err != nil {

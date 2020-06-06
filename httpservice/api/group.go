@@ -8,6 +8,7 @@ import (
 	"github.com/kprc/chatserver/chatcrypt"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/chatserver/db"
+	"log"
 )
 
 func AddGroup(uc *protocol.UserCommand) *protocol.UCReply {
@@ -22,6 +23,7 @@ func AddGroup(uc *protocol.UserCommand) *protocol.UCReply {
 
 	if req, err = DecryptGroupDesc(uc); err != nil {
 		reply.ResultCode = 1
+		log.Println(err)
 		return reply
 	}
 
@@ -31,12 +33,14 @@ func AddGroup(uc *protocol.UserCommand) *protocol.UCReply {
 		fdb := db.GetChatFriendsDB()
 		err = fdb.AddGroup(uc.SP.SignText.CPubKey, req.GD.GroupID)
 		if err != nil {
+			log.Println(err)
 			reply.ResultCode = 1
 		} else {
 			err = gdb.Insert(req.GD.GroupID, req.GD.GroupAlias, uc.SP.SignText.CPubKey)
 			if err != nil {
 				fdb.DelGroup(uc.SP.SignText.CPubKey, req.GD.GroupID)
 				reply.ResultCode = 1
+				log.Println(err)
 			}
 			gdb.IncRefer(req.GD.GroupID)
 			gmdb := db.GetChatGrpMbrsDB()

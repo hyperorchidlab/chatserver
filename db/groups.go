@@ -158,7 +158,7 @@ func (cg *ChatGroupsDB) DecRefer(grpId string) error {
 }
 
 func (cg *ChatGroupsDB) Find(grpId string) (*Group, error) {
-	cg.dbLock.Unlock()
+	cg.dbLock.Lock()
 	defer cg.dbLock.Unlock()
 
 	if vs, err := cg.NbsDbInter.Find(grpId); err != nil {
