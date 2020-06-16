@@ -71,6 +71,18 @@ func (uc *MessageDispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		reply = ListFriendSummary(req)
 	case protocol.ListGroupSummary:
 		reply = ListGroupSummary(req)
+	case protocol.StoreGrpKeys:
+		reply = StoreGroupKeys(req)
+	case protocol.FetchGrpKeys:
+		reply = FetchGroupKeys(req)
+	case protocol.StoreP2pMsg:
+		reply = StoreP2pMsg(req)
+	case protocol.FetchP2pMsg:
+		reply = FetchP2pMs(req)
+	case protocol.StoreGMsg:
+		reply = StoreGroupMsg(req)
+	case protocol.FetchGMsg:
+		reply = FetchGroupMsg(req)
 	}
 
 	var bresp []byte

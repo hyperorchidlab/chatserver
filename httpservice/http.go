@@ -17,6 +17,7 @@ func StartWebDaemon() {
 
 	mux.Handle("/ajax/userreg", &api.UserRegister{})
 	mux.Handle("/ajax/cmd", &api.MessageDispatch{})
+	//mux.Handle("/ajax/chat/p2p",)
 
 	addr := ":" + strconv.Itoa(config.GetCSC().MgtHttpPort)
 

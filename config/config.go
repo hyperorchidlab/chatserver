@@ -25,6 +25,9 @@ type ChatServerConfig struct {
 	FriendsDBFile   string `json:"friendsdbfile"`
 	GroupsDBFile    string `json:"groupsdbfile"`
 	GrpMemberDBFile string `json:"grpmemberdbfile"`
+	GroupKeysDbFile string `json:"groupkeysdbfile"`
+	GroupMsgDbPath  string `json:"groupmsgdbpath"`
+	P2PMsgDbPath    string `json:"p2pmsgdbpath"`
 
 	ChatListenPort int `json:"chatport"`
 	//ChatMgmtPort   int			`json:"chatmgmtport"`
@@ -47,6 +50,9 @@ func (bc *ChatServerConfig) InitCfg() *ChatServerConfig {
 	bc.FriendsDBFile = "friends.db"
 	bc.GroupsDBFile = "groups.db"
 	bc.GrpMemberDBFile = "grpm.db"
+	bc.GroupKeysDbFile = "gks.db"
+	bc.GroupMsgDbPath = "msgdb"
+	bc.P2PMsgDbPath = "p2pmsgdb"
 	bc.ChatListenPort = 50102
 	bc.KeyFile = "chat_server.key"
 
@@ -186,6 +192,28 @@ func (bc *ChatServerConfig) getDbPath() string {
 	return dbpath
 }
 
+func (bc *ChatServerConfig) GetGroupMsgDbPath() string {
+	msgpath := path.Join(bc.getDbPath(), bc.GroupMsgDbPath)
+
+	if tools.FileExists(msgpath) {
+		return msgpath
+	}
+	os.MkdirAll(msgpath, 0755)
+
+	return msgpath
+}
+
+func (bc *ChatServerConfig) GetP2PMsgDbPath() string {
+	msgpath := path.Join(bc.getDbPath(), bc.P2PMsgDbPath)
+
+	if tools.FileExists(msgpath) {
+		return msgpath
+	}
+	os.MkdirAll(msgpath, 0755)
+
+	return msgpath
+}
+
 func (bc *ChatServerConfig) GetUsersDbPath() string {
 	return path.Join(bc.getDbPath(), bc.UsersDBFile)
 }
@@ -204,6 +232,10 @@ func (bc *ChatServerConfig) GetKeyPath() string {
 
 func (bc *ChatServerConfig) GetGrpMbrsDbPath() string {
 	return path.Join(bc.getDbPath(), bc.GrpMemberDBFile)
+}
+
+func (bc *ChatServerConfig) GetGrpKeysDbPath() string {
+	return path.Join(bc.getDbPath(), bc.GroupKeysDbFile)
 }
 
 func IsInitialized() bool {
