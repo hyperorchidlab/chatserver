@@ -100,7 +100,6 @@ func (gkdb *GroupKeysDb) Insert(gks [][]byte, pks [][]byte) (key string) {
 	key = gk.GenKey()
 
 	if _, err := gkdb.NbsDbInter.Find(key); err != nil {
-
 		j, _ := json.Marshal(*gk)
 		gkdb.NbsDbInter.Insert(key, string(j))
 	}
@@ -111,7 +110,7 @@ func (gkdb *GroupKeysDb) Insert(gks [][]byte, pks [][]byte) (key string) {
 func (gkdb *GroupKeysDb) Insert2(gks []string, pks []string) (key string) {
 	gk := &GroupKeys{}
 
-	key := gk.GenKey()
+	key = gk.GenKey()
 
 	if _, err := gkdb.NbsDbInter.Find(key); err != nil {
 		j, _ := json.Marshal(*gk)
@@ -126,7 +125,7 @@ func (gkdb *GroupKeysDb) Find(key string) *GroupKeys {
 		return nil
 	} else {
 		gk := &GroupKeys{}
-		_ := json.Unmarshal([]byte(v), gk)
+		json.Unmarshal([]byte(v), gk)
 
 		return gk
 	}

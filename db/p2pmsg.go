@@ -86,7 +86,7 @@ func (pdb *P2PMsgHDB) FindMsg(id string, begin, n int) (msgs []*LabelP2pMsg) {
 
 		pm := &P2PMsg{}
 
-		_ := json.Unmarshal([]byte(v.V), pm)
+		json.Unmarshal([]byte(v.V), pm)
 
 		lm := &LabelP2pMsg{}
 		lm.Msg = pm.Msg
