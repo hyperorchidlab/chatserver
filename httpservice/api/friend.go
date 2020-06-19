@@ -18,24 +18,70 @@ func AddFriend(uc *protocol.UserCommand) *protocol.UCReply {
 	reply.CipherTxt = uc.CipherTxt
 
 	var (
-		req *protocol.FriendReq
-		err error
+		req                 *protocol.FriendReq
+		err                 error
+		plaintxt, cippertxt []byte
 	)
 
-	if req, err = DecryptFriendDesc(uc); err != nil {
+	cm := &CipherMachine{}
+
+	plaintxt, err = cm.Decrypt(uc)
+	if err != nil {
 		reply.ResultCode = 1
 		return reply
 	}
 
+	req = &protocol.FriendReq{}
+	err = json.Unmarshal(plaintxt, &req.FD)
+	if err != nil {
+		reply.ResultCode = 1
+		return reply
+	}
+
+	udb := db.GetChatUserDB()
+	var u *db.ChatUser
+	u, err = udb.Find(req.FD.PeerPubKey)
+	if err != nil {
+		reply.ResultCode = 2
+		return reply
+	}
+
 	fdb := db.GetChatFriendsDB()
+	var agree int
 
 	_, err = fdb.FindFriend(uc.SP.SignText.CPubKey, req.FD.PeerPubKey)
 	if err != nil {
+		agree = 1
 		fdb.AgreeFriend(uc.SP.SignText.CPubKey, req.FD.PeerPubKey, true)
 		fdb.AgreeFriend(req.FD.PeerPubKey, uc.SP.SignText.CPubKey, false)
 	} else {
+		agree = 3
 		fdb.AgreeFriend(uc.SP.SignText.CPubKey, req.FD.PeerPubKey, true)
 	}
+
+	var f *db.Friend
+	f, err = fdb.FindFriend(uc.SP.SignText.CPubKey, req.FD.PeerPubKey)
+	if err != nil {
+		reply.ResultCode = 3
+		return reply
+	}
+
+	resp := &protocol.FriendAddResp{}
+	resp.FAI.Addr = address.ChatAddress(req.FD.PeerPubKey)
+	resp.FAI.AliasName = u.Alias
+	resp.FAI.Agree = agree
+	resp.FAI.AddTime = f.AddTime
+
+	var j []byte
+	j, err = json.Marshal(resp.FAI)
+	if err != nil {
+		reply.ResultCode = 4
+		return reply
+	}
+
+	cippertxt, err = cm.Encrpt(uc, string(j))
+
+	reply.CipherTxt = base58.Encode(cippertxt)
 
 	return reply
 }

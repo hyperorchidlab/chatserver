@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/kprc/chatserver/db"
 	"fmt"
+	"github.com/kprc/chatserver/db"
 )
 
 func main() {
@@ -25,9 +25,9 @@ func main() {
 	//	fmt.Println(string(r[i]))
 	//}
 
-	sesc:=db.Discrete2Section([]int{1,4,6,8,9,13,14,15})
+	sesc := db.Discrete2Section([]int{1, 4, 6, 8, 9, 13, 14, 15})
 
-	for i:=0;i<len(sesc);i++{
+	for i := 0; i < len(sesc); i++ {
 		fmt.Println(sesc[i].String())
 	}
 

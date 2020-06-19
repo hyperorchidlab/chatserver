@@ -68,7 +68,7 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 	}
 
 	gdb := db.GetGMsgDb()
-	ms := gdb.FindMsg(req.GMsg.Gid.String(), req.GMsg.Begin, req.GMsg.Count)
+	ms := gdb.FindMsg2(req.GMsg.Gid, uc.SP.SignText.CPubKey, req.GMsg.Begin, req.GMsg.Count)
 
 	if len(ms) == 0 {
 		reply.ResultCode = 1

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/chat-protocol/address"
+	"github.com/kprc/chat-protocol/groupid"
 	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chatserver/chatcrypt"
 	"github.com/kprc/chatserver/config"
@@ -17,13 +18,22 @@ func AddGroup(uc *protocol.UserCommand) *protocol.UCReply {
 	reply.CipherTxt = uc.CipherTxt
 
 	var (
-		req *protocol.GroupReq
-		err error
+		req      *protocol.GroupReq
+		err      error
+		plainTxt []byte
 	)
 
-	if req, err = DecryptGroupDesc(uc); err != nil {
+	cm := &CipherMachine{}
+	plainTxt, err = cm.Decrypt(uc)
+	if err != nil {
 		reply.ResultCode = 1
-		log.Println(err)
+		return reply
+	}
+
+	req = &protocol.GroupReq{}
+	err = json.Unmarshal(plainTxt, &req.GD)
+	if err != nil {
+		reply.ResultCode = 1
 		return reply
 	}
 
@@ -41,6 +51,7 @@ func AddGroup(uc *protocol.UserCommand) *protocol.UCReply {
 				fdb.DelGroup(uc.SP.SignText.CPubKey, req.GD.GroupID)
 				reply.ResultCode = 1
 				log.Println(err)
+				return reply
 			}
 			gdb.IncRefer(req.GD.GroupID)
 			gmdb := db.GetChatGrpMbrsDB()
@@ -51,6 +62,28 @@ func AddGroup(uc *protocol.UserCommand) *protocol.UCReply {
 		reply.ResultCode = 2 //exists
 		return reply
 	}
+
+	resp := &protocol.GroupResp{}
+	resp.GCI.GID = groupid.GrpID(req.GD.GroupID)
+	resp.GCI.GroupName = req.GD.GroupAlias
+	resp.GCI.IsOwner = true
+	g, _ := gdb.Find(req.GD.GroupID)
+	if g != nil {
+		resp.GCI.CreateTime = g.CreateTime
+	}
+	var j, ciphertxt []byte
+	j, err = json.Marshal(resp.GCI)
+	if err != nil {
+		log.Println(err)
+		return reply
+	}
+	ciphertxt, err = cm.Encrpt(uc, string(j))
+	if err != nil {
+		log.Println(err)
+		return reply
+	}
+
+	reply.CipherTxt = base58.Encode(ciphertxt)
 
 	return reply
 

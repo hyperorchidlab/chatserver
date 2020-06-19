@@ -1,17 +1,18 @@
 package db
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/chat-protocol/address"
+	"github.com/kprc/chat-protocol/groupid"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/nbsnetwork/db"
 	"github.com/kprc/nbsnetwork/hdb"
-	"sync"
 	"log"
-	"github.com/kprc/chat-protocol/groupid"
-	"github.com/btcsuite/btcutil/base58"
-	"crypto/sha256"
 	"strconv"
-	"fmt"
+	"sync"
 )
 
 type GroupMsgHDB struct {
@@ -64,10 +65,10 @@ func GetGMsgDb() *GroupMsgHDB {
 
 func (gmdb *GroupMsgHDB) Insert(id string, keyHash string, cipherTxt string) {
 
-	grpKeyDb:=GetChatGrpKeysDb()
+	grpKeyDb := GetChatGrpKeysDb()
 
-	keys:=grpKeyDb.Find(keyHash)
-	if keys == nil{
+	keys := grpKeyDb.Find(keyHash)
+	if keys == nil {
 		log.Println("No group key in db , drop the message")
 		return
 	}
@@ -79,91 +80,116 @@ func (gmdb *GroupMsgHDB) Insert(id string, keyHash string, cipherTxt string) {
 	gmdb.dbLock.Lock()
 	defer gmdb.dbLock.Unlock()
 
-	idx,_:=gmdb.HistoryDBIntf.Insert(id, string(j))
+	idx, _ := gmdb.HistoryDBIntf.Insert(id, string(j))
 
-	for i:=0;i<len(keys.PubKeys);i++{
-		pk:=keys.PubKeys[i]
-		u:=groupid.GrpID(id).ToBytes()
-		u = append(u,base58.Decode(pk)...)
+	for i := 0; i < len(keys.PubKeys); i++ {
+		pk := keys.PubKeys[i]
+		u := groupid.GrpID(id).ToBytes()
+		u = append(u, base58.Decode(pk)...)
 
-		hash:=sha256.Sum256(u)
+		hash := sha256.Sum256(u)
 
-		gmdb.HistoryDBIntf.Insert(base58.Encode(hash[:]),strconv.Itoa(idx))
+		gmdb.HistoryDBIntf.Insert(base58.Encode(hash[:]), strconv.Itoa(idx))
 	}
 
 }
 
-func (gmdb *GroupMsgHDB)FindMsg2(gid groupid.GrpID, pk string, begin, n int) (msgs []*LabelGroupMsg) {
+func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (msgs []*LabelGroupMsg) {
 	gmdb.dbLock.Lock()
 	defer gmdb.dbLock.Unlock()
 
-	if _,err := gmdb.HistoryDBIntf.FindBlock(gid.String()); err!=nil{
+	if _, err := gmdb.HistoryDBIntf.FindBlock(gid.String()); err != nil {
 		return nil
 	}
 
-	u:=groupid.GrpID(gid).ToBytes()
-	u=append(u,base58.Decode(pk)...)
-	hash:=sha256.Sum256(u)
-	fid:=base58.Encode(hash[:])
+	u := groupid.GrpID(gid).ToBytes()
+	u = append(u, address.ChatAddress(pk).GetBytes()...)
+	hash := sha256.Sum256(u)
+	fid := base58.Encode(hash[:])
 
-	if _,err:=gmdb.HistoryDBIntf.FindBlock(fid);err!=nil{
+	if _, err := gmdb.HistoryDBIntf.FindBlock(fid); err != nil {
 		return nil
 	}
 
-	r,err:=gmdb.HistoryDBIntf.Find(fid,begin,n)
-	if err != nil || len(r) == 0{
+	r, err := gmdb.HistoryDBIntf.Find(fid, begin, n)
+	if err != nil || len(r) == 0 {
 		return nil
 	}
+	var dc []int
+	for i := 0; i < len(r); i++ {
+		cnt, _ := strconv.Atoi(r[i].V)
+		dc = append(dc, cnt)
+	}
+	ses := Discrete2Section(dc)
 
-	
+	return gmdb.findMsgBySecs(gid.String(), ses)
+}
 
+func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section) (msgs []*LabelGroupMsg) {
 
+	for i := 0; i < len(ses); i++ {
+		r, err := gmdb.HistoryDBIntf.Find(id, ses[i].begin, ses[i].to)
+		if err != nil || len(r) == 0 {
+			continue
+		}
 
-	return nil
+		for i := 0; i < len(r); i++ {
+			v := r[i]
 
+			gm := &GroupMsg{}
 
+			json.Unmarshal([]byte(v.V), gm)
+			lgm := &LabelGroupMsg{}
+			lgm.Msg = gm.Msg
+			lgm.AesKey = gm.AesKey
+			lgm.Cnt = v.Cnt
+
+			msgs = append(msgs, lgm)
+		}
+	}
+
+	return
 }
 
 type Section struct {
 	begin, to int
 }
 
-func (s *Section)String() string {
-	return  fmt.Sprintf("begin: %-8d To: %-8d",s.begin,s.to)
+func (s *Section) String() string {
+	return fmt.Sprintf("begin: %-8d To: %-8d", s.begin, s.to)
 }
 
-func Discrete2Section(discretes []int) []Section  {
+func Discrete2Section(discretes []int) []Section {
 
-	if len(discretes) == 0{
+	if len(discretes) == 0 {
 		return nil
 	}
 
-	prev:=discretes[0]
+	prev := discretes[0]
 
 	var secs []Section
 
-	sec := Section{begin:prev}
+	sec := Section{begin: prev}
 
-	for i:=1;i<len(discretes);i++{
-		if prev + 1 == discretes[i]{
-			prev ++
+	for i := 1; i < len(discretes); i++ {
+		if prev+1 == discretes[i] {
+			prev++
 			continue
 		}
 		sec.to = prev
 		prev = discretes[i]
 
-		secs = append(secs,sec)
+		secs = append(secs, sec)
 
-		sec = Section{begin:prev}
+		sec = Section{begin: prev}
 	}
 
 	sec.to = prev
 
-	secs = append(secs,sec)
+	secs = append(secs, sec)
 
 	return secs
 }
-
 
 func (gmdb *GroupMsgHDB) FindMsg(id string, begin, n int) (msgs []*LabelGroupMsg) {
 	gmdb.dbLock.Lock()
@@ -195,5 +221,3 @@ func (gmdb *GroupMsgHDB) FindMsg(id string, begin, n int) (msgs []*LabelGroupMsg
 
 	return
 }
-
-

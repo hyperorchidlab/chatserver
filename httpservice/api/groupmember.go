@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/kprc/chat-protocol/address"
+	"github.com/kprc/chat-protocol/groupid"
 	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chatserver/chatcrypt"
 	"github.com/kprc/chatserver/config"
 	"github.com/kprc/chatserver/db"
+	"github.com/kprc/nbsnetwork/tools"
+	"log"
 )
 
 func JoinGroup(uc *protocol.UserCommand) *protocol.UCReply {
@@ -16,11 +19,21 @@ func JoinGroup(uc *protocol.UserCommand) *protocol.UCReply {
 	reply.CipherTxt = uc.CipherTxt
 
 	var (
-		req *protocol.GroupMemberReq
-		err error
+		req        *protocol.GroupMemberReq
+		err        error
+		plainBytes []byte
 	)
 
-	if req, err = DecryptGroupMbrDesc(uc); err != nil {
+	cm := CipherMachine{}
+	plainBytes, err = cm.Decrypt(uc)
+	if err != nil {
+		reply.ResultCode = 1
+		return reply
+	}
+
+	req = &protocol.GroupMemberReq{}
+	err = json.Unmarshal(plainBytes, &req.GMD)
+	if err != nil {
 		reply.ResultCode = 1
 		return reply
 	}
@@ -63,6 +76,48 @@ func JoinGroup(uc *protocol.UserCommand) *protocol.UCReply {
 	gmdb := db.GetChatGrpMbrsDB()
 
 	gmdb.AddMember(req.GMD.GroupID, req.GMD.Friend)
+
+	resp := protocol.GroupMemberResp{}
+	gmai := &resp.GMAI
+
+	gmai.GID = groupid.GrpID(req.GMD.GroupID)
+	gmai.FriendAddr = address.ChatAddress(req.GMD.Friend)
+	udb := db.GetChatUserDB()
+	u, _ := udb.Find(req.GMD.Friend)
+	if u != nil {
+		gmai.FriendName = u.Alias
+	}
+	gmai.JoinTime = tools.GetNowMsTime()
+
+	f1, _ := fdb.FindFriend(uc.SP.SignText.CPubKey, req.GMD.Friend)
+	f2, _ := fdb.FindFriend(req.GMD.Friend, uc.SP.SignText.CPubKey)
+	b1 := false
+	b2 := false
+	if f1 != nil {
+		b1 = f1.Agree
+	}
+	if f2 != nil {
+		b2 = f2.Agree
+	}
+
+	gmai.Agree = getAgree(b1, b2)
+
+	var j []byte
+	var cipherbytes []byte
+
+	j, err = json.Marshal(resp.GMAI)
+	if err != nil {
+		log.Println(err)
+		return reply
+	}
+
+	cipherbytes, err = cm.Encrpt(uc, string(j))
+	if err != nil {
+		log.Println(err)
+		return reply
+	}
+
+	reply.CipherTxt = base58.Encode(cipherbytes)
 
 	return reply
 }
