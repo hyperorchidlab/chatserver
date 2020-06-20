@@ -248,6 +248,9 @@ func ListGroupMbrs(uc *protocol.UserCommand) *protocol.UCReply {
 	}
 
 	gml := &protocol.GroupMbrDetailsList{}
+	gml.Owner = gm.Owner
+
+	//db.GenKey()
 
 	for i := 0; i < len(gm.Members); i++ {
 		m := gm.Members[i]
@@ -275,6 +278,20 @@ func ListGroupMbrs(uc *protocol.UserCommand) *protocol.UCReply {
 
 		mbr.Agree = getAgree(ag, bg)
 		gml.FD = append(gml.FD, *mbr)
+	}
+
+	var pkbytes [][]byte
+	for i := 0; i < len(gm.Members); i++ {
+		pkbytes = append(pkbytes, address.ChatAddress(gm.Members[i]).GetBytes())
+	}
+
+	hashk := db.GenKeyByPubKeys(pkbytes, address.ChatAddress(gm.Owner).GetBytes())
+	gkdb := db.GetChatGrpKeysDb()
+	gks := gkdb.Find(hashk)
+	if gks != nil {
+		gml.Gkeys = gks.GroupKeys
+		gml.PKeys = gks.PubKeys
+		gml.Hashk = hashk
 	}
 
 	var (

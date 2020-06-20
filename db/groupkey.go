@@ -86,6 +86,23 @@ func GenKey(pks [][]byte, gpks [][]byte) string {
 
 }
 
+func GenKeyByPubKeys(pks [][]byte, owner []byte) string {
+	r := chatcrypt.InsertionSortDArray(pks)
+
+	r = append(r, owner)
+
+	var shabytes []byte
+
+	for i := 0; i < len(r); i++ {
+		shabytes = append(shabytes, r[i]...)
+	}
+
+	hash := sha256.Sum256(shabytes)
+
+	return base58.Encode(hash[:])
+
+}
+
 func (gkdb *GroupKeysDb) Insert(gks [][]byte, pks [][]byte) (key string) {
 	gk := &GroupKeys{}
 
