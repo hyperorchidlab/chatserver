@@ -102,6 +102,11 @@ func JoinGroup(uc *protocol.UserCommand) *protocol.UCReply {
 
 	gmai.Agree = getAgree(b1, b2)
 
+	//save group keys
+	gkdb := db.GetChatGrpKeysDb()
+	gkhash := gkdb.Insert2(req.GMD.GKeys, req.GMD.Pubkeys)
+	gmai.GKeyHash = gkhash
+
 	var j []byte
 	var cipherbytes []byte
 
@@ -128,11 +133,25 @@ func QuitGroup(uc *protocol.UserCommand) *protocol.UCReply {
 	reply.CipherTxt = uc.CipherTxt
 
 	var (
-		req *protocol.GroupMemberReq
-		err error
+		req        *protocol.GroupMemberReq
+		err        error
+		plainBytes []byte
 	)
 
 	if req, err = DecryptGroupMbrDesc(uc); err != nil {
+		reply.ResultCode = 1
+		return reply
+	}
+
+	cm := &CipherMachine{}
+	plainBytes, err = cm.Decrypt(uc)
+	if err != nil {
+		reply.ResultCode = 2
+		return reply
+	}
+	req = &protocol.GroupMemberReq{}
+	err = json.Unmarshal(plainBytes, &req.GMD)
+	if err != nil {
 		reply.ResultCode = 1
 		return reply
 	}
@@ -169,6 +188,32 @@ func QuitGroup(uc *protocol.UserCommand) *protocol.UCReply {
 
 	gmdb := db.GetChatGrpMbrsDB()
 	gmdb.DelMember(req.GMD.GroupID, req.GMD.Friend)
+
+	//save to db
+	gkdb := db.GetChatGrpKeysDb()
+	hashkey := gkdb.Insert2(req.GMD.GKeys, req.GMD.Pubkeys)
+
+	resp := &protocol.GroupMemberResp{}
+	gmai := &resp.GMAI
+	gmai.GKeyHash = hashkey
+	gmai.GID = groupid.GrpID(req.GMD.GroupID)
+
+	var (
+		j           []byte
+		cipherBytes []byte
+	)
+	j, err = json.Marshal(resp.GMAI)
+	if err != nil {
+		log.Println(err)
+		return reply
+	}
+	cipherBytes, err = cm.Encrpt(uc, string(j))
+	if err != nil {
+		log.Println(err)
+		return reply
+	}
+
+	reply.CipherTxt = base58.Encode(cipherBytes)
 
 	return reply
 
