@@ -35,7 +35,7 @@ func StoreGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 
 	gdb := db.GetGMsgDb()
 
-	gdb.Insert(req.GMsg.Gid.String(), req.GMsg.AesHash, req.GMsg.Msg)
+	gdb.Insert(req.GMsg.Gid, req.GMsg.AesHash, req.GMsg.Speek, req.GMsg.Msg)
 
 	return reply
 
@@ -84,6 +84,7 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 		lm.Cnt = m.Cnt
 		lm.Msg = m.Msg
 		lm.AesHash = m.AesKey
+		lm.Speek = m.Speek
 
 		resp.GMsg.LM = append(resp.GMsg.LM, lm)
 

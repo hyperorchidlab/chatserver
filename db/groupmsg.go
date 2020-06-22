@@ -31,14 +31,16 @@ var (
 )
 
 type GroupMsg struct {
-	AesKey string `json:"aes_key"`
-	Msg    string `json:"msg"`
+	AesKey string              `json:"aes_key"`
+	Msg    string              `json:"msg"`
+	Speek  address.ChatAddress `json:"seepk"`
 }
 
 type LabelGroupMsg struct {
-	AesKey string `json:"aes_key"`
-	Msg    string `json:"msg"`
-	Cnt    int    `json:"cnt"`
+	AesKey string              `json:"aes_key"`
+	Msg    string              `json:"msg"`
+	Speek  address.ChatAddress `json:"speek"`
+	Cnt    int                 `json:"cnt"`
 }
 
 func newChatGroupMsgDb() *GroupMsgHDB {
@@ -63,7 +65,7 @@ func GetGMsgDb() *GroupMsgHDB {
 	return gmhdb
 }
 
-func (gmdb *GroupMsgHDB) Insert(id string, keyHash string, cipherTxt string) {
+func (gmdb *GroupMsgHDB) Insert(gid groupid.GrpID, keyHash string, speek address.ChatAddress, cipherTxt string) {
 
 	grpKeyDb := GetChatGrpKeysDb()
 
@@ -73,18 +75,18 @@ func (gmdb *GroupMsgHDB) Insert(id string, keyHash string, cipherTxt string) {
 		return
 	}
 
-	gm := &GroupMsg{AesKey: keyHash, Msg: cipherTxt}
+	gm := &GroupMsg{AesKey: keyHash, Msg: cipherTxt, Speek: speek}
 
 	j, _ := json.Marshal(*gm)
 
 	gmdb.dbLock.Lock()
 	defer gmdb.dbLock.Unlock()
 
-	idx, _ := gmdb.HistoryDBIntf.Insert(id, string(j))
+	idx, _ := gmdb.HistoryDBIntf.Insert(gid.String(), string(j))
 
 	for i := 0; i < len(keys.PubKeys); i++ {
 		pk := keys.PubKeys[i]
-		u := groupid.GrpID(id).ToBytes()
+		u := gid.ToBytes()
 		u = append(u, base58.Decode(pk)...)
 
 		hash := sha256.Sum256(u)
@@ -143,6 +145,7 @@ func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section) (msgs []*LabelG
 			lgm.Msg = gm.Msg
 			lgm.AesKey = gm.AesKey
 			lgm.Cnt = v.Cnt
+			lgm.Speek = gm.Speek
 
 			msgs = append(msgs, lgm)
 		}

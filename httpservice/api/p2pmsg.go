@@ -1,11 +1,33 @@
 package api
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chatserver/db"
 	"github.com/mr-tron/base58"
 )
+
+func getKey(peerPk string, myPk string) string {
+	var r []byte
+	a := address.ChatAddress(peerPk).GetBytes()
+	b := address.ChatAddress(myPk).GetBytes()
+
+	if bytes.Compare(a, b) > 0 {
+		r = append(r, a...)
+		r = append(r, b...)
+	} else {
+		r = append(r, b...)
+		r = append(r, a...)
+	}
+
+	hash := sha256.New().Sum(r)
+
+	return base58.Encode(hash[:])
+
+}
 
 func StoreP2pMsg(uc *protocol.UserCommand) *protocol.UCReply {
 	reply := &protocol.UCReply{}
@@ -35,7 +57,7 @@ func StoreP2pMsg(uc *protocol.UserCommand) *protocol.UCReply {
 
 	pdb := db.GetP2PMsgDb()
 
-	pdb.Insert(req.Msg.PeerPk, req.Msg.MyPk, req.Msg.Msg)
+	pdb.Insert(getKey(req.Msg.PeerPk, req.Msg.MyPk), req.Msg.MyPk, req.Msg.Msg)
 
 	return reply
 }
@@ -66,8 +88,10 @@ func FetchP2pMs(uc *protocol.UserCommand) *protocol.UCReply {
 		return reply
 	}
 
+	id := getKey(uc.SP.SignText.CPubKey, req.Msg.PeerPk)
+
 	pdb := db.GetP2PMsgDb()
-	ms := pdb.FindMsg(uc.SP.SignText.CPubKey, req.Msg.Begin, req.Msg.Count)
+	ms := pdb.FindMsg(id, req.Msg.Begin, req.Msg.Count)
 
 	if len(ms) == 0 {
 		reply.ResultCode = 1
@@ -82,7 +106,7 @@ func FetchP2pMs(uc *protocol.UserCommand) *protocol.UCReply {
 		lm := protocol.LP2pMsg{}
 		lm.Cnt = m.Cnt
 		lm.Msg = m.Msg
-		lm.PeerPk = m.AesKey
+		lm.PubKey = m.AesKey
 
 		resp.Msg = append(resp.Msg, lm)
 
