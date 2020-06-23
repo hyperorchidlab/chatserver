@@ -165,13 +165,14 @@ func showFriend(ownerPk string) string {
 	fdb := db.GetChatFriendsDB()
 	fdb.Iterator()
 	for {
-		_, f, _ := fdb.Next()
+		k, f, _ := fdb.Next()
 		if f == nil {
 			break
 		}
 		if msg != "" {
 			msg += "\r\n"
 		}
+		f.Owner = k
 		msg += showFriendsDetails(f)
 	}
 
