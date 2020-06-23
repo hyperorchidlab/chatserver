@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chatserver/db"
 )
@@ -35,7 +36,7 @@ func StoreGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 
 	gdb := db.GetGMsgDb()
 
-	gdb.Insert(req.GMsg.Gid, req.GMsg.AesHash, req.GMsg.Speek, req.GMsg.Msg)
+	gdb.Insert(req.GMsg.Gid, req.GMsg.AesHash, address.ChatAddress(uc.SP.SignText.CPubKey), req.GMsg.Msg)
 
 	return reply
 
