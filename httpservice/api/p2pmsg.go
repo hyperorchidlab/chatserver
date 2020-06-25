@@ -122,7 +122,7 @@ func FetchP2pMs(uc *protocol.UserCommand) *protocol.UCReply {
 		return reply
 	}
 
-	uc.CipherTxt = base58.Encode(ciphertxt)
+	reply.CipherTxt = base58.Encode(ciphertxt)
 
 	return reply
 }
