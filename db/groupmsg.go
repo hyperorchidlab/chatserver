@@ -84,14 +84,20 @@ func (gmdb *GroupMsgHDB) Insert(gid groupid.GrpID, keyHash string, speek address
 
 	idx, _ := gmdb.HistoryDBIntf.Insert(gid.String(), string(j))
 
+	log.Println("gid:", gid.String())
+
 	for i := 0; i < len(keys.PubKeys); i++ {
 		pk := keys.PubKeys[i]
+		var ku []byte
 		u := gid.ToBytes()
-		u = append(u, base58.Decode(pk)...)
+		ku = append(ku, u...)
+		pku := base58.Decode(pk)
+		ku = append(ku, pku...)
 
-		hash := sha256.Sum256(u)
-
-		gmdb.HistoryDBIntf.Insert(base58.Encode(hash[:]), strconv.Itoa(idx))
+		hash := sha256.Sum256(ku)
+		k := base58.Encode(hash[:])
+		log.Println(base58.Encode(u), pk, k, idx)
+		gmdb.HistoryDBIntf.Insert(k, strconv.Itoa(idx))
 	}
 
 }
@@ -101,20 +107,30 @@ func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (m
 	defer gmdb.dbLock.Unlock()
 
 	if _, err := gmdb.HistoryDBIntf.FindBlock(gid.String()); err != nil {
+		log.Println(gid.String(), err)
 		return nil
 	}
 
-	u := groupid.GrpID(gid).ToBytes()
-	u = append(u, address.ChatAddress(pk).GetBytes()...)
-	hash := sha256.Sum256(u)
+	u := gid.ToBytes()
+	var ku []byte
+	ku = append(ku, u...)
+	pku := address.ChatAddress(pk).GetBytes()
+	ku = append(ku, pku...)
+	hash := sha256.Sum256(ku)
 	fid := base58.Encode(hash[:])
 
+	log.Println("gid", gid.String())
+
+	log.Println(base58.Encode(ku), base58.Encode(pku), fid)
+
 	if _, err := gmdb.HistoryDBIntf.FindBlock(fid); err != nil {
+		log.Println(fid, err)
 		return nil
 	}
 
 	r, err := gmdb.HistoryDBIntf.Find(fid, begin, n)
 	if err != nil || len(r) == 0 {
+		log.Println(fid, err, len(r))
 		return nil
 	}
 	var dc []int
@@ -123,6 +139,8 @@ func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (m
 		dc = append(dc, cnt)
 	}
 	ses := Discrete2Section(dc)
+
+	log.Println(ses)
 
 	return gmdb.findMsgBySecs(gid.String(), ses)
 }

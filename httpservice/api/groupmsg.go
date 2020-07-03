@@ -6,6 +6,7 @@ import (
 	"github.com/kprc/chat-protocol/address"
 	"github.com/kprc/chat-protocol/protocol"
 	"github.com/kprc/chatserver/db"
+	"log"
 )
 
 func StoreGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
@@ -56,6 +57,7 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 
 	plaintxt, err = cm.Decrypt(uc)
 	if err != nil {
+		log.Println(err, 1)
 		reply.ResultCode = 1
 		return reply
 	}
@@ -64,6 +66,7 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 
 	err = json.Unmarshal(plaintxt, &req.GMsg)
 	if err != nil {
+		log.Println(err, 2)
 		reply.ResultCode = 1
 		return reply
 	}
@@ -72,11 +75,14 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 	ms := gdb.FindMsg2(req.GMsg.Gid, uc.SP.SignText.CPubKey, req.GMsg.Begin, req.GMsg.Count)
 
 	if len(ms) == 0 {
+		log.Println("ms is none")
 		reply.ResultCode = 1
 		return reply
 	}
 
 	resp := &protocol.GMsgFetchResp{}
+
+	resp.GMsg.Gid = req.GMsg.Gid
 
 	for i := 0; i < len(ms); i++ {
 		m := ms[i]
@@ -97,6 +103,7 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 
 	ciphertxt, err = cm.Encrpt(uc, string(data))
 	if err != nil {
+		log.Println(err, 3)
 		reply.ResultCode = 1
 		return reply
 	}
