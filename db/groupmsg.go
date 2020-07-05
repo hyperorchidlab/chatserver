@@ -41,7 +41,7 @@ type LabelGroupMsg struct {
 	Msg    string              `json:"msg"`
 	Speek  address.ChatAddress `json:"speek"`
 	Cnt    int                 `json:"cnt"`
-	UCnt   int 				   `json:"u_cnt"`
+	UCnt   int                 `json:"u_cnt"`
 }
 
 func newChatGroupMsgDb() *GroupMsgHDB {
@@ -104,7 +104,7 @@ func (gmdb *GroupMsgHDB) Insert(gid groupid.GrpID, keyHash string, speek address
 }
 
 type SecIdx struct {
-	Idx int
+	Idx  int
 	VIdx int
 }
 
@@ -134,7 +134,7 @@ func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (m
 		return nil
 	}
 
-	log.Println("--->",fid,begin,n)
+	log.Println("--->", fid, begin, n)
 
 	r, err := gmdb.HistoryDBIntf.Find(fid, begin, n)
 	if err != nil || len(r) == 0 {
@@ -144,18 +144,18 @@ func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (m
 	var dc []SecIdx
 	for i := 0; i < len(r); i++ {
 		cnt, _ := strconv.Atoi(r[i].V)
-		dc = append(dc, SecIdx{Idx: r[i].Cnt,VIdx: cnt})
+		dc = append(dc, SecIdx{Idx: r[i].Cnt, VIdx: cnt})
 	}
 	ses := Discrete2Section(dc)
 
 	log.Println(ses)
 
-	return gmdb.findMsgBySecs(gid.String(), ses,dc)
+	return gmdb.findMsgBySecs(gid.String(), ses, dc)
 }
 
-func findIdx(vidx int, dc []SecIdx) int  {
-	for i:=0;i<len(dc);i++{
-		if dc[i].VIdx == vidx{
+func findIdx(vidx int, dc []SecIdx) int {
+	for i := 0; i < len(dc); i++ {
+		if dc[i].VIdx == vidx {
 			return dc[i].Idx
 		}
 	}
@@ -166,7 +166,7 @@ func findIdx(vidx int, dc []SecIdx) int  {
 func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section, dc []SecIdx) (msgs []*LabelGroupMsg) {
 
 	for i := 0; i < len(ses); i++ {
-		r, err := gmdb.HistoryDBIntf.Find(id, ses[i].begin.VIdx, (ses[i].to.VIdx-ses[i].begin.VIdx + 1))
+		r, err := gmdb.HistoryDBIntf.Find(id, ses[i].begin.VIdx, (ses[i].to.VIdx - ses[i].begin.VIdx + 1))
 		if err != nil || len(r) == 0 {
 			continue
 		}
@@ -182,7 +182,7 @@ func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section, dc []SecIdx) (m
 			lgm.AesKey = gm.AesKey
 			lgm.Cnt = v.Cnt
 			lgm.Speek = gm.Speek
-			lgm.UCnt = findIdx(v.Cnt,dc)
+			lgm.UCnt = findIdx(v.Cnt, dc)
 
 			msgs = append(msgs, lgm)
 		}
