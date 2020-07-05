@@ -71,6 +71,8 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 		return reply
 	}
 
+	log.Println(req.GMsg)
+
 	gdb := db.GetGMsgDb()
 	ms := gdb.FindMsg2(req.GMsg.Gid, uc.SP.SignText.CPubKey, req.GMsg.Begin, req.GMsg.Count)
 
@@ -92,6 +94,7 @@ func FetchGroupMsg(uc *protocol.UserCommand) *protocol.UCReply {
 		lm.Msg = m.Msg
 		lm.AesHash = m.AesKey
 		lm.Speek = m.Speek
+		lm.UCnt = m.UCnt
 
 		resp.GMsg.LM = append(resp.GMsg.LM, lm)
 

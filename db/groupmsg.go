@@ -41,6 +41,7 @@ type LabelGroupMsg struct {
 	Msg    string              `json:"msg"`
 	Speek  address.ChatAddress `json:"speek"`
 	Cnt    int                 `json:"cnt"`
+	UCnt   int 				   `json:"u_cnt"`
 }
 
 func newChatGroupMsgDb() *GroupMsgHDB {
@@ -102,6 +103,11 @@ func (gmdb *GroupMsgHDB) Insert(gid groupid.GrpID, keyHash string, speek address
 
 }
 
+type SecIdx struct {
+	Idx int
+	VIdx int
+}
+
 func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (msgs []*LabelGroupMsg) {
 	gmdb.dbLock.Lock()
 	defer gmdb.dbLock.Unlock()
@@ -128,33 +134,45 @@ func (gmdb *GroupMsgHDB) FindMsg2(gid groupid.GrpID, pk string, begin, n int) (m
 		return nil
 	}
 
+	log.Println("--->",fid,begin,n)
+
 	r, err := gmdb.HistoryDBIntf.Find(fid, begin, n)
 	if err != nil || len(r) == 0 {
 		log.Println(fid, err, len(r))
 		return nil
 	}
-	var dc []int
+	var dc []SecIdx
 	for i := 0; i < len(r); i++ {
 		cnt, _ := strconv.Atoi(r[i].V)
-		dc = append(dc, cnt)
+		dc = append(dc, SecIdx{Idx: r[i].Cnt,VIdx: cnt})
 	}
 	ses := Discrete2Section(dc)
 
 	log.Println(ses)
 
-	return gmdb.findMsgBySecs(gid.String(), ses)
+	return gmdb.findMsgBySecs(gid.String(), ses,dc)
 }
 
-func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section) (msgs []*LabelGroupMsg) {
+func findIdx(vidx int, dc []SecIdx) int  {
+	for i:=0;i<len(dc);i++{
+		if dc[i].VIdx == vidx{
+			return dc[i].Idx
+		}
+	}
+
+	return 0
+}
+
+func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section, dc []SecIdx) (msgs []*LabelGroupMsg) {
 
 	for i := 0; i < len(ses); i++ {
-		r, err := gmdb.HistoryDBIntf.Find(id, ses[i].begin, ses[i].to)
+		r, err := gmdb.HistoryDBIntf.Find(id, ses[i].begin.VIdx, (ses[i].to.VIdx-ses[i].begin.VIdx + 1))
 		if err != nil || len(r) == 0 {
 			continue
 		}
 
-		for i := 0; i < len(r); i++ {
-			v := r[i]
+		for j := 0; j < len(r); j++ {
+			v := r[j]
 
 			gm := &GroupMsg{}
 
@@ -164,6 +182,7 @@ func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section) (msgs []*LabelG
 			lgm.AesKey = gm.AesKey
 			lgm.Cnt = v.Cnt
 			lgm.Speek = gm.Speek
+			lgm.UCnt = findIdx(v.Cnt,dc)
 
 			msgs = append(msgs, lgm)
 		}
@@ -173,39 +192,42 @@ func (gmdb *GroupMsgHDB) findMsgBySecs(id string, ses []Section) (msgs []*LabelG
 }
 
 type Section struct {
-	begin, to int
+	begin, to SecIdx
 }
 
 func (s *Section) String() string {
 	return fmt.Sprintf("begin: %-8d To: %-8d", s.begin, s.to)
 }
 
-func Discrete2Section(discretes []int) []Section {
+func Discrete2Section(discretes []SecIdx) []Section {
 
 	if len(discretes) == 0 {
 		return nil
 	}
 
-	prev := discretes[0]
+	prev := discretes[0].VIdx
+	prevV := discretes[0]
 
 	var secs []Section
 
-	sec := Section{begin: prev}
+	sec := Section{begin: prevV}
 
 	for i := 1; i < len(discretes); i++ {
-		if prev+1 == discretes[i] {
+		if prev+1 == discretes[i].VIdx {
 			prev++
+			prevV = discretes[i]
 			continue
 		}
-		sec.to = prev
-		prev = discretes[i]
+		sec.to = prevV
+		prev = discretes[i].VIdx
+		prevV = discretes[i]
 
 		secs = append(secs, sec)
 
-		sec = Section{begin: prev}
+		sec = Section{begin: prevV}
 	}
 
-	sec.to = prev
+	sec.to = prevV
 
 	secs = append(secs, sec)
 
