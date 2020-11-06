@@ -3,17 +3,16 @@ package db
 import (
 	"encoding/json"
 	"errors"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/config"
 	"sync"
 	"time"
 )
 
 type ChatUsersDB struct {
-	db.NbsDbInter
+	NbsDbInter
 	dbLock sync.Mutex
-	cusor  *db.DBCusor
+	cusor  *DBCusor
 }
 
 var (
@@ -31,7 +30,7 @@ type ChatUser struct {
 
 func newChatUserDb() *ChatUsersDB {
 	cfg := config.GetCSC()
-	db := db.NewFileDb(cfg.GetUsersDbPath()).Load()
+	db := NewFileDb(cfg.GetUsersDbPath()).Load()
 
 	return &ChatUsersDB{NbsDbInter: db}
 }
@@ -58,7 +57,7 @@ func (s *ChatUsersDB) Insert(alias string, pubkey string, tv int64) error {
 		return errors.New("insert Failed, pubKey is in db")
 	}
 
-	now := tools.GetNowMsTime()
+	now := cmdcommon.GetNowMsTime()
 	cu := &ChatUser{}
 	cu.Alias = alias
 	cu.PubKey = pubkey
@@ -92,7 +91,7 @@ func (s *ChatUsersDB) Update(alias string, pubkey string, tv int64) error {
 			cu.PubKey = pubkey
 		}
 
-		now := tools.GetNowMsTime()
+		now := cmdcommon.GetNowMsTime()
 		cu.Alias = alias
 		cu.PubKey = pubkey
 		//cu.CreateTime = now
@@ -133,7 +132,7 @@ func (s *ChatUsersDB) UpdateExpireTime(pubkey string, tv int64) error {
 			cu.PubKey = pubkey
 		}
 
-		now := tools.GetNowMsTime()
+		now := cmdcommon.GetNowMsTime()
 		//cu.PubKey = pubkey
 		//cu.CreateTime = now
 		cu.UpdateTime = now
@@ -171,7 +170,7 @@ func (s *ChatUsersDB) UpdateAlias(pubkey string, alias string) error {
 			cu.PubKey = pubkey
 		}
 
-		now := tools.GetNowMsTime()
+		now := cmdcommon.GetNowMsTime()
 		//cu.PubKey = pubkey
 		//cu.CreateTime = now
 		cu.UpdateTime = now

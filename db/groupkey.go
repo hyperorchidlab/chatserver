@@ -4,16 +4,16 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/kprc/chatserver/chatcrypt"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
+	"github.com/hyperorchidlab/chatserver/chatcrypt"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/db/hdb"
 	"sync"
 )
 
 type GroupKeysDb struct {
-	db.NbsDbInter
+	NbsDbInter
 	dbLock sync.Mutex
-	cursor *db.DBCusor
+	cursor *hdb.DBCusor
 }
 
 var (
@@ -24,7 +24,7 @@ var (
 func newChatGroupkeysDb() *GroupKeysDb {
 	cfg := config.GetCSC()
 
-	db := db.NewFileDb(cfg.GetGrpKeysDbPath()).Load()
+	db := NewFileDb(cfg.GetGrpKeysDbPath()).Load()
 
 	return &GroupKeysDb{NbsDbInter: db}
 }

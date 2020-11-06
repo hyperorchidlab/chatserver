@@ -3,16 +3,15 @@ package db
 import (
 	"encoding/json"
 	"errors"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/config"
 	"sync"
 )
 
 type ChatFriendsDb struct {
-	db.NbsDbInter
+	NbsDbInter
 	dbLock sync.Mutex
-	cursor *db.DBCusor
+	cursor *DBCusor
 }
 
 var (
@@ -38,7 +37,7 @@ type ChatFriends struct {
 func newChatFriendsDB() *ChatFriendsDb {
 	cfg := config.GetCSC()
 
-	db := db.NewFileDb(cfg.GetFriendsDbPath()).Load()
+	db := NewFileDb(cfg.GetFriendsDbPath()).Load()
 
 	return &ChatFriendsDb{NbsDbInter: db}
 }
@@ -61,7 +60,7 @@ func (cf *ChatFriendsDb) AddFriend(ownerPk string, friendPK string) error {
 	defer cf.dbLock.Unlock()
 
 	cfs := &ChatFriends{}
-	cfs.CreateTime = tools.GetNowMsTime()
+	cfs.CreateTime = cmdcommon.GetNowMsTime()
 
 	if vs, err := cf.NbsDbInter.Find(ownerPk); err == nil {
 		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
@@ -77,11 +76,11 @@ func (cf *ChatFriendsDb) AddFriend(ownerPk string, friendPK string) error {
 		}
 	}
 
-	cfs.UpdateTime = tools.GetNowMsTime()
+	cfs.UpdateTime = cmdcommon.GetNowMsTime()
 
 	f := &Friend{}
 	f.PubKey = friendPK
-	f.AddTime = tools.GetNowMsTime()
+	f.AddTime = cmdcommon.GetNowMsTime()
 
 	cfs.Friends = append(cfs.Friends, *f)
 
@@ -99,7 +98,7 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 	defer cf.dbLock.Unlock()
 
 	cfs := &ChatFriends{}
-	cfs.CreateTime = tools.GetNowMsTime()
+	cfs.CreateTime = cmdcommon.GetNowMsTime()
 
 	if vs, err := cf.NbsDbInter.Find(ownerPk); err == nil {
 		if err = json.Unmarshal([]byte(vs), cfs); err != nil {
@@ -109,7 +108,7 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 	}
 	cfs.Owner = ownerPk
 
-	cfs.UpdateTime = tools.GetNowMsTime()
+	cfs.UpdateTime = cmdcommon.GetNowMsTime()
 
 	var i int
 	for i = 0; i < len(cfs.Friends); i++ {
@@ -122,7 +121,7 @@ func (cf *ChatFriendsDb) AgreeFriend(ownerPk string, friendPk string, agree bool
 	if i == len(cfs.Friends) {
 		f := &Friend{}
 		f.PubKey = friendPk
-		f.AddTime = tools.GetNowMsTime()
+		f.AddTime = cmdcommon.GetNowMsTime()
 		f.Agree = agree
 
 		cfs.Friends = append(cfs.Friends, *f)
@@ -152,7 +151,7 @@ func (cf *ChatFriendsDb) DelFriend(ownerPK string, friendPK string) error {
 		delflag := false
 		for i := 0; i < len(cfs.Friends); i++ {
 			if cfs.Friends[i].PubKey == friendPK {
-				cfs.UpdateTime = tools.GetNowMsTime()
+				cfs.UpdateTime = cmdcommon.GetNowMsTime()
 				cfs.Friends = append(cfs.Friends[:i], cfs.Friends[i+1:]...)
 				delflag = true
 				break
@@ -186,7 +185,7 @@ func (cf *ChatFriendsDb) AddGroup(ownerPk string, group string) error {
 		}
 	} else {
 		cfs = &ChatFriends{}
-		cfs.CreateTime = tools.GetNowMsTime()
+		cfs.CreateTime = cmdcommon.GetNowMsTime()
 	}
 
 	for i := 0; i < len(cfs.Groups); i++ {
@@ -195,7 +194,7 @@ func (cf *ChatFriendsDb) AddGroup(ownerPk string, group string) error {
 		}
 	}
 
-	cfs.UpdateTime = tools.GetNowMsTime()
+	cfs.UpdateTime = cmdcommon.GetNowMsTime()
 
 	cfs.Groups = append(cfs.Groups, group)
 
@@ -225,7 +224,7 @@ func (cf *ChatFriendsDb) DelGroup(ownerPK string, group string) error {
 
 		for i := 0; i < len(cfs.Groups); i++ {
 			if cfs.Groups[i] == group {
-				cfs.UpdateTime = tools.GetNowMsTime()
+				cfs.UpdateTime = cmdcommon.GetNowMsTime()
 				cfs.Groups = append(cfs.Groups[:i], cfs.Groups[i+1:]...)
 				delflag = true
 				return nil

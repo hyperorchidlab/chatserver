@@ -2,16 +2,15 @@ package db
 
 import (
 	"encoding/json"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/kprc/nbsnetwork/hdb"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/db/hdb"
 	"sync"
 )
 
 type P2PMsgHDB struct {
 	hdb.HistoryDBIntf
 	dbLock sync.Mutex
-	cursor *db.DBCusor
+	cursor *DBCusor
 }
 
 const (

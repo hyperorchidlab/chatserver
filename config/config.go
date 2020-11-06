@@ -3,7 +3,7 @@ package config
 import (
 	"crypto/ed25519"
 	"encoding/json"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
 	"log"
 	"os"
 	"path"
@@ -60,11 +60,11 @@ func (bc *ChatServerConfig) InitCfg() *ChatServerConfig {
 }
 
 func (bc *ChatServerConfig) Load() *ChatServerConfig {
-	if !tools.FileExists(GetCSCFGFile()) {
+	if !cmdcommon.FileExists(GetCSCFGFile()) {
 		return nil
 	}
 
-	jbytes, err := tools.OpenAndReadAll(GetCSCFGFile())
+	jbytes, err := cmdcommon.OpenAndReadAll(GetCSCFGFile())
 	if err != nil {
 		log.Println("load file failed", err)
 		return nil
@@ -112,7 +112,7 @@ func LoadFromCfgFile(file string) *ChatServerConfig {
 
 	bc.InitCfg()
 
-	bcontent, err := tools.OpenAndReadAll(file)
+	bcontent, err := cmdcommon.OpenAndReadAll(file)
 	if err != nil {
 		log.Fatal("Load Config file failed")
 		return nil
@@ -150,7 +150,7 @@ func LoadFromCmd(initfromcmd func(cmdbc *ChatServerConfig) *ChatServerConfig) *C
 }
 
 func GetCSCHomeDir() string {
-	curHome, err := tools.Home()
+	curHome, err := cmdcommon.Home()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -169,11 +169,11 @@ func (bc *ChatServerConfig) Save() {
 		log.Println("Save BASD Configuration json marshal failed", err)
 	}
 
-	if !tools.FileExists(GetCSCHomeDir()) {
+	if !cmdcommon.FileExists(GetCSCHomeDir()) {
 		os.MkdirAll(GetCSCHomeDir(), 0755)
 	}
 
-	err = tools.Save2File(jbytes, GetCSCFGFile())
+	err = cmdcommon.Save2File(jbytes, GetCSCFGFile())
 	if err != nil {
 		log.Println("Save BASD Configuration to file failed", err)
 	}
@@ -183,7 +183,7 @@ func (bc *ChatServerConfig) Save() {
 func (bc *ChatServerConfig) getDbPath() string {
 	dbpath := path.Join(GetCSCHomeDir(), bc.DBPath)
 
-	if tools.FileExists(dbpath) {
+	if cmdcommon.FileExists(dbpath) {
 		return dbpath
 	} else {
 		os.MkdirAll(dbpath, 0755)
@@ -195,7 +195,7 @@ func (bc *ChatServerConfig) getDbPath() string {
 func (bc *ChatServerConfig) GetGroupMsgDbPath() string {
 	msgpath := path.Join(bc.getDbPath(), bc.GroupMsgDbPath)
 
-	if tools.FileExists(msgpath) {
+	if cmdcommon.FileExists(msgpath) {
 		return msgpath
 	}
 	os.MkdirAll(msgpath, 0755)
@@ -206,7 +206,7 @@ func (bc *ChatServerConfig) GetGroupMsgDbPath() string {
 func (bc *ChatServerConfig) GetP2PMsgDbPath() string {
 	msgpath := path.Join(bc.getDbPath(), bc.P2PMsgDbPath)
 
-	if tools.FileExists(msgpath) {
+	if cmdcommon.FileExists(msgpath) {
 		return msgpath
 	}
 	os.MkdirAll(msgpath, 0755)
@@ -239,7 +239,7 @@ func (bc *ChatServerConfig) GetGrpKeysDbPath() string {
 }
 
 func IsInitialized() bool {
-	if tools.FileExists(GetCSCFGFile()) {
+	if cmdcommon.FileExists(GetCSCFGFile()) {
 		return true
 	}
 

@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chat-protocol/groupid"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/kprc/nbsnetwork/hdb"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chat-protocol/groupid"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/db/hdb"
 	"log"
 	"strconv"
 	"sync"
@@ -18,7 +17,7 @@ import (
 type GroupMsgHDB struct {
 	hdb.HistoryDBIntf
 	dbLock sync.Mutex
-	cursor *db.DBCusor
+	cursor *DBCusor
 }
 
 const (

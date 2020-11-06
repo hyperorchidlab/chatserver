@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/json"
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chat-protocol/protocol"
-	"github.com/kprc/chatserver/db"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chat-protocol/protocol"
+	"github.com/hyperorchidlab/chatserver/db"
 	"github.com/mr-tron/base58"
 )
 

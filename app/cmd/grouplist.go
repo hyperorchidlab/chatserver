@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/kprc/chatserver/app/cmdclient"
-	"github.com/kprc/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/app/cmdclient"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
 	"github.com/spf13/cobra"
 	"log"
 )

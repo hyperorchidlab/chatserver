@@ -8,9 +8,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdpb"
-	"github.com/kprc/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/app/cmdpb"
+	"github.com/hyperorchidlab/chatserver/config"
 	"strings"
 )
 

@@ -2,8 +2,8 @@ package httpservice
 
 import (
 	"context"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/chatserver/httpservice/api"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/httpservice/api"
 	"log"
 	"net/http"
 	"strconv"

@@ -2,17 +2,16 @@ package db
 
 import (
 	"encoding/json"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/config"
 	"github.com/pkg/errors"
 	"sync"
 )
 
 type ChatGroupMemberDB struct {
-	db.NbsDbInter
+	NbsDbInter
 	dbLock sync.Mutex
-	cursor *db.DBCusor
+	cursor *DBCusor
 }
 
 var (
@@ -30,7 +29,7 @@ type GroupMember struct {
 
 func newChatGroupMemberDB() *ChatGroupMemberDB {
 	cfg := config.GetCSC()
-	db := db.NewFileDb(cfg.GetGrpMbrsDbPath()).Load()
+	db := NewFileDb(cfg.GetGrpMbrsDbPath()).Load()
 
 	return &ChatGroupMemberDB{NbsDbInter: db}
 }
@@ -56,7 +55,7 @@ func (cgm *ChatGroupMemberDB) Insert(grpId string, owner string) error {
 	if _, err := cgm.NbsDbInter.Find(grpId); err == nil {
 		return errors.New("group id is in db")
 	}
-	now := tools.GetNowMsTime()
+	now := cmdcommon.GetNowMsTime()
 	gm := &GroupMember{}
 	gm.Owner = owner
 	gm.Members = append(gm.Members, owner)
@@ -91,7 +90,7 @@ func (cgm *ChatGroupMemberDB) AddMember(grpId string, mbr string) error {
 		}
 
 		gm.Members = append(gm.Members, mbr)
-		gm.UpdateTime = tools.GetNowMsTime()
+		gm.UpdateTime = cmdcommon.GetNowMsTime()
 
 		var vv []byte
 
@@ -136,7 +135,7 @@ func (cgm *ChatGroupMemberDB) DelMember(grpId string, mbr string) error {
 			return nil
 		}
 
-		gm.UpdateTime = tools.GetNowMsTime()
+		gm.UpdateTime = cmdcommon.GetNowMsTime()
 
 		var vv []byte
 

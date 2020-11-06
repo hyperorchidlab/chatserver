@@ -7,12 +7,12 @@ import (
 
 	"encoding/json"
 
-	"github.com/kprc/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/config"
 
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdpb"
-	"github.com/kprc/chatserver/httpservice"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/app/cmdpb"
+	"github.com/hyperorchidlab/chatserver/httpservice"
 	"sync"
 )
 

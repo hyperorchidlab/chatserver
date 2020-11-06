@@ -18,13 +18,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/config"
 
-	"github.com/kprc/chatserver/app/cmdservice"
+	"github.com/hyperorchidlab/chatserver/app/cmdservice"
 
-	"github.com/kprc/chatserver/chatcrypt"
-	"github.com/kprc/chatserver/httpservice"
+	"github.com/hyperorchidlab/chatserver/chatcrypt"
+	"github.com/hyperorchidlab/chatserver/httpservice"
 	"github.com/spf13/cobra"
 	"log"
 )

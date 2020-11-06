@@ -18,9 +18,9 @@ package cmd
 import (
 	"errors"
 	"github.com/howeyc/gopass"
-	"github.com/kprc/chatserver/app/cmdclient"
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/chatcrypt"
+	"github.com/hyperorchidlab/chatserver/app/cmdclient"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/chatcrypt"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

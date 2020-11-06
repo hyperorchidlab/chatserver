@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"github.com/BASChain/go-account"
 	"github.com/BASChain/go-account/edwards25519"
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/config"
 	"golang.org/x/crypto/curve25519"
 	"io"
 	"log"
@@ -30,7 +30,7 @@ func KeyIsGenerated() bool {
 		return false
 	}
 
-	if tools.FileExists(cfg.GetKeyPath()) {
+	if cmdcommon.FileExists(cfg.GetKeyPath()) {
 		return true
 	}
 
@@ -40,7 +40,7 @@ func KeyIsGenerated() bool {
 func LoadKey(password string) {
 	cfg := config.GetCSC()
 
-	data, err := tools.OpenAndReadAll(cfg.GetKeyPath())
+	data, err := cmdcommon.OpenAndReadAll(cfg.GetKeyPath())
 	if err != nil {
 		log.Fatal("Load From key file error")
 		return
@@ -102,7 +102,7 @@ func GenEd25519KeyAndSave(password string) error {
 
 	var data []byte
 	data, err = json.Marshal(*kj)
-	err = tools.Save2File(data, cfg.GetKeyPath())
+	err = cmdcommon.Save2File(data, cfg.GetKeyPath())
 	if err != nil {
 		return err
 	}

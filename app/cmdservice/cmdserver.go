@@ -10,10 +10,10 @@ import (
 	"google.golang.org/grpc/reflection"
 	"log"
 
-	"github.com/kprc/chatserver/app/cmdpb"
-	"github.com/kprc/chatserver/app/cmdservice/api"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/chatserver/httpservice"
+	"github.com/hyperorchidlab/chatserver/app/cmdpb"
+	"github.com/hyperorchidlab/chatserver/app/cmdservice/api"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/httpservice"
 )
 
 type cmdServer struct {

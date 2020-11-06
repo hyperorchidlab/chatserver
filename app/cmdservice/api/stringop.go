@@ -2,16 +2,16 @@ package api
 
 import (
 	"context"
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdpb"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/app/cmdpb"
 
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chatserver/chatcrypt"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chatserver/chatcrypt"
 
 	"fmt"
-	"github.com/kprc/chat-protocol/groupid"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/chatserver/db"
+	"github.com/hyperorchidlab/chat-protocol/groupid"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/db"
 	"strconv"
 	"time"
 )

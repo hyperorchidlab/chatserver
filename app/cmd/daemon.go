@@ -20,9 +20,9 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 
-	"github.com/kprc/chatserver/app/cmdcommon"
-	"github.com/kprc/chatserver/app/cmdservice"
-	"github.com/kprc/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/app/cmdservice"
+	"github.com/hyperorchidlab/chatserver/config"
 	//"github.com/BASChain/go-bas-discover-wanip/dns/dohserver"
 	//"github.com/BASChain/go-bas-discover-wanip/dns/mem"
 

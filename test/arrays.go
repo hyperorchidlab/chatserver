@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"github.com/kprc/chatserver/db"
-)
-
 func main() {
 	//a := []byte{'a'}
 	//b := []byte{'b'}
@@ -25,10 +20,10 @@ func main() {
 	//	fmt.Println(string(r[i]))
 	//}
 
-	sesc := db.Discrete2Section([]int{1, 4, 6, 8, 9, 13, 14, 15})
-
-	for i := 0; i < len(sesc); i++ {
-		fmt.Println(sesc[i].String())
-	}
+	//sesc := db.Discrete2Section([]int{1, 4, 6, 8, 9, 13, 14, 15})
+	//
+	//for i := 0; i < len(sesc); i++ {
+	//	fmt.Println(sesc[i].String())
+	//}
 
 }

@@ -3,16 +3,15 @@ package db
 import (
 	"encoding/json"
 	"errors"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/nbsnetwork/db"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/config"
 	"sync"
 )
 
 type ChatGroupsDB struct {
-	db.NbsDbInter
+	NbsDbInter
 	dbLock sync.Mutex
-	cursor *db.DBCusor
+	cursor *DBCusor
 }
 
 var (
@@ -31,7 +30,7 @@ type Group struct {
 
 func newChatGroupDb() *ChatGroupsDB {
 	cfg := config.GetCSC()
-	db := db.NewFileDb(cfg.GetGroupsDbPath()).Load()
+	db := NewFileDb(cfg.GetGroupsDbPath()).Load()
 
 	return &ChatGroupsDB{NbsDbInter: db}
 }
@@ -56,7 +55,7 @@ func (cg *ChatGroupsDB) Insert(grpID string, alias, owner string) error {
 	if _, err := cg.NbsDbInter.Find(grpID); err == nil {
 		return errors.New("group id is in db")
 	}
-	now := tools.GetNowMsTime()
+	now := cmdcommon.GetNowMsTime()
 	g := &Group{}
 	g.Alias = alias
 	g.CreateTime = now
@@ -87,7 +86,7 @@ func (cg *ChatGroupsDB) UpdateAlias(grpId string, alias string) error {
 			g.GrpId = grpId
 		}
 
-		now := tools.GetNowMsTime()
+		now := cmdcommon.GetNowMsTime()
 		g.Alias = alias
 
 		g.UpdateTime = now
@@ -114,7 +113,7 @@ func (cg *ChatGroupsDB) IncRefer(grpId string) error {
 			return err
 		}
 		g.RefCnt++
-		g.UpdateTime = tools.GetNowMsTime()
+		g.UpdateTime = cmdcommon.GetNowMsTime()
 
 		if v, err := json.Marshal(*g); err != nil {
 			return err
@@ -139,7 +138,7 @@ func (cg *ChatGroupsDB) DecRefer(grpId string) error {
 			return err
 		}
 		g.RefCnt--
-		g.UpdateTime = tools.GetNowMsTime()
+		g.UpdateTime = cmdcommon.GetNowMsTime()
 
 		if g.RefCnt <= 0 {
 			cg.NbsDbInter.Delete(grpId)

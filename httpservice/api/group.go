@@ -3,12 +3,12 @@ package api
 import (
 	"encoding/json"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chat-protocol/groupid"
-	"github.com/kprc/chat-protocol/protocol"
-	"github.com/kprc/chatserver/chatcrypt"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/chatserver/db"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chat-protocol/groupid"
+	"github.com/hyperorchidlab/chat-protocol/protocol"
+	"github.com/hyperorchidlab/chatserver/chatcrypt"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/db"
 	"log"
 )
 

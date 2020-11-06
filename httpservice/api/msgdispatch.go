@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/kprc/chat-protocol/address"
-	"github.com/kprc/chat-protocol/protocol"
-	"github.com/kprc/chatserver/chatcrypt"
-	"github.com/kprc/chatserver/config"
-	"github.com/kprc/chatserver/db"
-	"github.com/kprc/nbsnetwork/tools"
+	"github.com/hyperorchidlab/chat-protocol/address"
+	"github.com/hyperorchidlab/chat-protocol/protocol"
+	"github.com/hyperorchidlab/chatserver/app/cmdcommon"
+	"github.com/hyperorchidlab/chatserver/chatcrypt"
+	"github.com/hyperorchidlab/chatserver/config"
+	"github.com/hyperorchidlab/chatserver/db"
 	"io/ioutil"
 	"net/http"
 )
@@ -117,7 +117,7 @@ func ValidateSig(sp *protocol.SignPack) bool {
 		return false
 	}
 
-	if u.ExpireTime < tools.GetNowMsTime() {
+	if u.ExpireTime < cmdcommon.GetNowMsTime() {
 		return false
 	}
 
